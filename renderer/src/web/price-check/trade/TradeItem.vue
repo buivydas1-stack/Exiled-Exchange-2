@@ -2,6 +2,7 @@
   <!-- Render nothing directly, all behavior is applied to the element passed via ref -->
   <tr
     ref="target"
+    :class="{ 'old-listing': result.isOldListing }"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
@@ -234,6 +235,10 @@ export default defineComponent({
 </script>
 
 <style lang="postcss">
+.old-listing {
+  background: rgba(185, 28, 28, 0.28) !important;
+}
+
 .tippy-box[data-theme~="item-tooltip"] {
   @apply w-fit h-fit;
   /* hiding box more */
