@@ -1,22 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { isListingAtLeastOneDayOld } from "@/web/price-check/trade/listing-age";
+import { isListingAtLeastTwelveHoursOld } from "@/web/price-check/trade/listing-age";
 
 const NOW = Date.parse("2026-08-28T12:00:00.000Z");
 
-describe("isListingAtLeastOneDayOld", () => {
-  it("treats an exactly 24-hour-old listing as old", () => {
-    expect(isListingAtLeastOneDayOld("2026-08-27T12:00:00.000Z", NOW)).toBe(
-      true,
-    );
-  });
-
-  it("does not treat a listing one millisecond under 24 hours as old", () => {
-    expect(isListingAtLeastOneDayOld("2026-08-27T12:00:00.001Z", NOW)).toBe(
-      false,
-    );
-  });
-
-  it("does not treat an invalid timestamp as old", () => {
-    expect(isListingAtLeastOneDayOld("invalid", NOW)).toBe(false);
+describe("isListingAtLeastTwelveHoursOld", () => {
+  it.each([
+    ["exactly 12 hours", "2026-08-28T00:00:00.000Z", true],
+    ["one millisecond under 12 hours", "2026-08-28T00:00:00.001Z", false],
+    ["18 hours", "2026-08-27T18:00:00.000Z", true],
+    ["24 hours", "2026-08-27T12:00:00.000Z", true],
+    ["a future timestamp", "2026-08-28T13:00:00.000Z", false],
+    ["an invalid timestamp", "invalid", false],
+  ])("handles %s", (_label, timestamp, expected) => {
+    expect(isListingAtLeastTwelveHoursOld(timestamp, NOW)).toBe(expected);
   });
 });

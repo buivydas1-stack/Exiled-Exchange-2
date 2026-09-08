@@ -22,7 +22,7 @@ import { STAT_BY_REF, CLIENT_STRINGS as _$ } from "@/assets/data";
 import { RateLimiter } from "./RateLimiter";
 import { ModifierType } from "@/parser/modifiers";
 import { Cache } from "./Cache";
-import { isListingAtLeastOneDayOld } from "./listing-age";
+import { isListingAtLeastTwelveHoursOld } from "./listing-age";
 import { parseAffixStrings } from "@/parser/Parser";
 import {
   CoreCurrency,
@@ -1395,7 +1395,7 @@ export async function requestResults(
         DateTime.fromISO(result.listing.indexed).toRelative({
           style: "short",
         }) ?? "",
-      isOldListing: isListingAtLeastOneDayOld(result.listing.indexed),
+      isOldListing: isListingAtLeastTwelveHoursOld(result.listing.indexed),
       priceAmount: result.listing.price?.amount ?? 0,
       priceCurrency: result.listing.price?.currency ?? "no price",
       priceCurrencyRank,

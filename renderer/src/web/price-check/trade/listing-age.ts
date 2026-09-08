@@ -1,10 +1,10 @@
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
 
-export function isListingAtLeastOneDayOld(
+export function isListingAtLeastTwelveHoursOld(
   indexed: string,
   now = Date.now(),
 ): boolean {
   const indexedAt = Date.parse(indexed);
 
-  return Number.isFinite(indexedAt) && now - indexedAt >= ONE_DAY_MS;
+  return Number.isFinite(indexedAt) && now - indexedAt >= TWELVE_HOURS_MS;
 }
