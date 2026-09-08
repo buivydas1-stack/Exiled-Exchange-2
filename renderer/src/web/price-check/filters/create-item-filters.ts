@@ -543,10 +543,13 @@ function createGemFilters(
     return filters;
   }
 
+  const isSkillGem =
+    item.category === ItemCategory.Gem || item.category === ItemCategory.MetaGem;
+
   if (item.gemSockets!) {
     filters.socketNumber = {
       value: item.gemSockets.number,
-      disabled: item.gemSockets.number < 3,
+      disabled: !isSkillGem && item.gemSockets.number < 3,
     };
   }
 
@@ -559,7 +562,7 @@ function createGemFilters(
 
   filters.gemLevel = {
     value: item.gemLevel!,
-    disabled: item.gemLevel! < 19,
+    disabled: !isSkillGem && item.gemLevel! < 19,
   };
 
   return filters;
