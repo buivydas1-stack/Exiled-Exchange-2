@@ -447,7 +447,7 @@ export function createFilters(
     if (item.unidentifiedTier) {
       filters.unidentifiedTier = {
         value: item.unidentifiedTier,
-        disabled: item.unidentifiedTier < 5,
+        disabled: false,
       };
     }
   }

@@ -34,7 +34,7 @@ Waystones retain the existing tier-based behavior. Non-equipment such as Wombgif
 does not gain automatic item-level selection. Unique items do not gain it either.
 
 Unidentified items select the **Unidentified** filter, including tiered items.
-The separate existing unidentified-tier default (selected at tier 5) is preserved.
+Whenever an unidentified tier is present, its minimum-tier filter is selected too.
 Useful item levels are selected for unidentified nonunique items. Identified
 flask/charm filters remain optional. Both filters remain editable.
 

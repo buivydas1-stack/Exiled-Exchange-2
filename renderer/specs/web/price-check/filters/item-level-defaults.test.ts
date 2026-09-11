@@ -76,7 +76,7 @@ describe("verified normal-modifier item-level limits", () => {
   );
 
   it.each([2, 4, 5])(
-    "keeps Unidentified selected for tier %s while preserving the tier default",
+    "selects both Unidentified and its tier %s in the outgoing query",
     (tier) => {
       const item = {
         ...base(ItemCategory.OneHandedMace),
@@ -85,8 +85,12 @@ describe("verified normal-modifier item-level limits", () => {
       const filters = createFilters(item, createTestCreateOptions());
       expect(filters.unidentifiedTier).toEqual({
         value: tier,
-        disabled: tier < 5,
+        disabled: false,
       });
+      expect(
+        createTradeRequest(filters, [], item).query.filters.misc_filters
+          ?.filters.unidentified_tier,
+      ).toEqual({ min: tier });
       expect(
         createTradeRequest(filters, [], item).query.filters.misc_filters
           ?.filters.identified,

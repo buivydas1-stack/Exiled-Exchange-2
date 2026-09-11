@@ -62,11 +62,11 @@ describe("unidentified item tests", () => {
   });
 
   it.each([
-    [2, true],
-    [3, true],
-    [4, true],
+    [2, false],
+    [3, false],
+    [4, false],
     [5, false],
-  ])("#. Should be enabled by default only on T5", (tier, disabled) => {
+  ])("#. Should select every present unidentified tier", (tier, disabled) => {
     const item: ParsedItem = {
       ...createTestItem(),
       isUnidentified: true,
