@@ -85,6 +85,7 @@ import FilterName from "./filters/FilterName.vue";
 import Tip from "../help/Tip.vue";
 import { createTradeRequest } from "./trade/pathofexile-trade";
 import { shouldStartInitialSearch } from "./initial-search";
+import { applyModifierExclusions } from "./filters/modifier-exclusions";
 import { AppConfig, TipsFrequency } from "@/web/Config";
 import { FilterPreset } from "./filters/interfaces";
 import { PriceCheckWidget } from "../overlay/interfaces";
@@ -175,6 +176,11 @@ export default defineComponent({
             : undefined,
           defaultAllSelected: widget.value.defaultAllSelected,
         });
+
+        applyModifierExclusions(
+          presets.value.presets,
+          widget.value.modifierExclusions,
+        );
 
         doSearch.value = shouldStartInitialSearch(
           item,

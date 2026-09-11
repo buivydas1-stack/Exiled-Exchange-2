@@ -164,6 +164,36 @@
     <ui-checkbox class="mb-4" v-model="defaultAllSelected">{{
       t(":default_all_selected")
     }}</ui-checkbox>
+    <div class="mb-4">
+      <label for="modifier-exclusions" class="block mb-1">{{
+        t(":modifier_exclusions")
+      }}</label>
+      <textarea
+        id="modifier-exclusions"
+        v-model="modifierExclusions"
+        rows="4"
+        spellcheck="false"
+        class="rounded bg-gray-900 px-2 py-1 block w-full font-mono resize-y"
+        :placeholder="t(':modifier_exclusions_placeholder')"
+        :aria-invalid="invalidExclusionLines.length > 0"
+        aria-describedby="modifier-exclusions-help modifier-exclusions-error"
+      />
+      <div id="modifier-exclusions-help" class="mt-1 text-gray-500">
+        {{ t(":modifier_exclusions_hint") }}
+      </div>
+      <div
+        v-if="invalidExclusionLines.length"
+        id="modifier-exclusions-error"
+        role="status"
+        class="mt-1 text-orange-400"
+      >
+        {{
+          t(":modifier_exclusions_invalid", {
+            lines: invalidExclusionLines.join(", "),
+          })
+        }}
+      </div>
+    </div>
     <ui-checkbox class="mb-4" v-model="alwaysShowTier">{{
       t(":always_show_tier")
     }}</ui-checkbox>
@@ -249,6 +279,7 @@ import { useLeagues } from "../background/Leagues";
 import { getAugmentNameByRef } from "./filters/fill-augments.js";
 import { usePoeninja } from "../background/Prices.js";
 import UiItemImg from "../ui/UiItemImg.vue";
+import { compileModifierExclusions } from "./filters/modifier-exclusions";
 
 export default defineComponent({
   name: "price_check.name",
@@ -351,6 +382,15 @@ export default defineComponent({
       defaultAllSelected: configModelValue(
         () => configWidget.value,
         "defaultAllSelected",
+      ),
+      modifierExclusions: configModelValue(
+        () => configWidget.value,
+        "modifierExclusions",
+      ),
+      invalidExclusionLines: computed(
+        () =>
+          compileModifierExclusions(configWidget.value.modifierExclusions)
+            .invalidLines,
       ),
       leagues,
       availableCoreCurrencies,

@@ -200,6 +200,7 @@ export default defineComponent({
         rememberCurrency: false,
         // New Settings EE2
         defaultAllSelected: false,
+        modifierExclusions: "",
         itemHoverTooltip: "keybind",
         alwaysShowTier: false,
         coreCurrency: "exalted",
