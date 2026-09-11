@@ -393,13 +393,15 @@ export function createFilters(
           disabled: !opts.exact,
         };
       } else {
-        // TODO limit level by item type
+        const usefulLevel = maxUsefulItemLevel(item.category);
         filters.itemLevel = {
-          value: Math.min(item.itemLevel, maxUsefulItemLevel(item.category)),
+          value: Math.min(item.itemLevel, usefulLevel),
           disabled:
-            !opts.exact ||
-            item.category === ItemCategory.Flask ||
-            item.category === ItemCategory.Charm,
+            item.isUnidentified && Number.isFinite(usefulLevel)
+              ? false
+              : !opts.exact ||
+                item.category === ItemCategory.Flask ||
+                item.category === ItemCategory.Charm,
         };
       }
     }
@@ -441,15 +443,11 @@ export function createFilters(
   }
 
   if (item.isUnidentified) {
+    filters.unidentified = { value: true, disabled: false };
     if (item.unidentifiedTier) {
       filters.unidentifiedTier = {
         value: item.unidentifiedTier,
         disabled: item.unidentifiedTier < 5,
-      };
-    } else {
-      filters.unidentified = {
-        value: true,
-        disabled: item.rarity !== ItemRarity.Unique,
       };
     }
   }

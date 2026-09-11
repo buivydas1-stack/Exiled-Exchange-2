@@ -1,0 +1,418 @@
+{
+  "checkedAt": "2026-09-11",
+  "gamePatch": "0.5.5b",
+  "source": "https://poe2db.tw/us/",
+  "pool": "normal",
+  "categories": {
+    "TowerAugment": {
+      "level": 1,
+      "tables": {
+        "Abyss_Tablet": {
+          "modifiers": 33,
+          "limitingModifier": "Challenger's"
+        },
+        "Breach_Tablet": {
+          "modifiers": 31,
+          "limitingModifier": "Challenger's"
+        },
+        "Delirium_Tablet": {
+          "modifiers": 33,
+          "limitingModifier": "Challenger's"
+        },
+        "Expedition_Tablet": {
+          "modifiers": 37,
+          "limitingModifier": "Challenger's"
+        },
+        "Irradiated_Tablet": {
+          "modifiers": 24,
+          "limitingModifier": "Challenger's"
+        },
+        "Overseer_Tablet": {
+          "modifiers": 32,
+          "limitingModifier": "Challenger's"
+        },
+        "Ritual_Tablet": {
+          "modifiers": 33,
+          "limitingModifier": "Challenger's"
+        },
+        "Temple_Tablet": {
+          "modifiers": 31,
+          "limitingModifier": "Challenger's"
+        }
+      }
+    },
+    "Relic": {
+      "level": 80,
+      "tables": {
+        "Amphora_Relic": {
+          "modifiers": 42,
+          "limitingModifier": "Brightening"
+        },
+        "Coffer_Relic": {
+          "modifiers": 37,
+          "limitingModifier": "of Betterment"
+        },
+        "Incense_Relic": {
+          "modifiers": 37,
+          "limitingModifier": "of Betterment"
+        },
+        "Seal_Relic": {
+          "modifiers": 57,
+          "limitingModifier": "Brightening"
+        },
+        "Tapestry_Relic": {
+          "modifiers": 42,
+          "limitingModifier": "Brightening"
+        },
+        "Urn_Relic": {
+          "modifiers": 57,
+          "limitingModifier": "Brightening"
+        },
+        "Vase_Relic": {
+          "modifiers": 37,
+          "limitingModifier": "of Betterment"
+        }
+      }
+    },
+    "Amulet": {
+      "level": 82,
+      "tables": {
+        "Amulets": {
+          "modifiers": 209,
+          "limitingModifier": "of the Infinite"
+        }
+      }
+    },
+    "Belt": {
+      "level": 82,
+      "tables": {
+        "Belts": {
+          "modifiers": 135,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Body Armour": {
+      "level": 82,
+      "tables": {
+        "Body_Armours_dex_int": {
+          "modifiers": 152,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Body_Armours_dex": {
+          "modifiers": 144,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Body_Armours_int": {
+          "modifiers": 141,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Body_Armours_str_dex_int": {
+          "modifiers": 203,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Body_Armours_str_dex": {
+          "modifiers": 155,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Body_Armours_str_int": {
+          "modifiers": 152,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Body_Armours_str": {
+          "modifiers": 144,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Boots": {
+      "level": 82,
+      "tables": {
+        "Boots_dex_int": {
+          "modifiers": 135,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Boots_dex": {
+          "modifiers": 129,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Boots_int": {
+          "modifiers": 125,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Boots_str_dex": {
+          "modifiers": 139,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Boots_str_int": {
+          "modifiers": 135,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Boots_str": {
+          "modifiers": 129,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Bow": {
+      "level": 82,
+      "tables": {
+        "Bows": {
+          "modifiers": 140,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Buckler": {
+      "level": 82,
+      "tables": {
+        "Bucklers": {
+          "modifiers": 118,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Charm": {
+      "level": 83,
+      "tables": {
+        "Charms": {
+          "modifiers": 51,
+          "limitingModifier": "of the Chemist"
+        }
+      }
+    },
+    "Crossbow": {
+      "level": 82,
+      "tables": {
+        "Crossbows": {
+          "modifiers": 146,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Jewel": {
+      "level": 1,
+      "tables": {
+        "Diamond": {
+          "modifiers": 160,
+          "limitingModifier": "Accurate"
+        },
+        "Emerald": {
+          "modifiers": 74,
+          "limitingModifier": "Accurate"
+        },
+        "Ruby": {
+          "modifiers": 50,
+          "limitingModifier": "Blasting"
+        },
+        "Sapphire": {
+          "modifiers": 58,
+          "limitingModifier": "of Ailing"
+        },
+        "Time-Lost_Diamond": {
+          "modifiers": 160,
+          "limitingModifier": "Greater"
+        },
+        "Time-Lost_Emerald": {
+          "modifiers": 77,
+          "limitingModifier": "Greater"
+        },
+        "Time-Lost_Ruby": {
+          "modifiers": 53,
+          "limitingModifier": "Greater"
+        },
+        "Time-Lost_Sapphire": {
+          "modifiers": 60,
+          "limitingModifier": "Greater"
+        }
+      }
+    },
+    "Focus": {
+      "level": 82,
+      "tables": {
+        "Foci": {
+          "modifiers": 140,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Gloves": {
+      "level": 82,
+      "tables": {
+        "Gloves_dex_int": {
+          "modifiers": 180,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Gloves_dex": {
+          "modifiers": 174,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Gloves_int": {
+          "modifiers": 178,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Gloves_str_dex": {
+          "modifiers": 184,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Gloves_str_int": {
+          "modifiers": 188,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Gloves_str": {
+          "modifiers": 182,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Helmet": {
+      "level": 82,
+      "tables": {
+        "Helmets_dex_int": {
+          "modifiers": 135,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Helmets_dex": {
+          "modifiers": 137,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Helmets_int": {
+          "modifiers": 125,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Helmets_str_dex": {
+          "modifiers": 147,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Helmets_str_int": {
+          "modifiers": 135,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Helmets_str": {
+          "modifiers": 137,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Flask": {
+      "level": 83,
+      "tables": {
+        "Life_Flasks": {
+          "modifiers": 57,
+          "limitingModifier": "of the Chemist"
+        },
+        "Mana_Flasks": {
+          "modifiers": 57,
+          "limitingModifier": "of the Chemist"
+        }
+      }
+    },
+    "One Hand Mace": {
+      "level": 82,
+      "tables": {
+        "One_Hand_Maces": {
+          "modifiers": 150,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Warstaff": {
+      "level": 82,
+      "tables": {
+        "Quarterstaves": {
+          "modifiers": 158,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Quiver": {
+      "level": 82,
+      "tables": {
+        "Quivers": {
+          "modifiers": 100,
+          "limitingModifier": "Nimble"
+        }
+      }
+    },
+    "Ring": {
+      "level": 82,
+      "tables": {
+        "Rings": {
+          "modifiers": 203,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Sceptre": {
+      "level": 82,
+      "tables": {
+        "Sceptres": {
+          "modifiers": 150,
+          "limitingModifier": "Empowering"
+        }
+      }
+    },
+    "Shield": {
+      "level": 82,
+      "tables": {
+        "Shields_str_dex": {
+          "modifiers": 134,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Shields_str_int": {
+          "modifiers": 132,
+          "limitingModifier": "of Tzteosh"
+        },
+        "Shields_str": {
+          "modifiers": 123,
+          "limitingModifier": "of Tzteosh"
+        }
+      }
+    },
+    "Spear": {
+      "level": 82,
+      "tables": {
+        "Spears": {
+          "modifiers": 162,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Staff": {
+      "level": 81,
+      "tables": {
+        "Staves": {
+          "modifiers": 185,
+          "limitingModifier": "Pyromancer's"
+        }
+      }
+    },
+    "Talisman": {
+      "level": 82,
+      "tables": {
+        "Talismans": {
+          "modifiers": 158,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Two Hand Mace": {
+      "level": 82,
+      "tables": {
+        "Two_Hand_Maces": {
+          "modifiers": 150,
+          "limitingModifier": "Merciless"
+        }
+      }
+    },
+    "Wand": {
+      "level": 81,
+      "tables": {
+        "Wands": {
+          "modifiers": 185,
+          "limitingModifier": "Pyromancer's"
+        }
+      }
+    }
+  }
+}

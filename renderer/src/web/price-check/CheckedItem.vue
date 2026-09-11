@@ -71,7 +71,7 @@ import {
   ComponentPublicInstance,
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { ItemRarity, ItemCategory, ParsedItem } from "@/parser";
+import { ItemRarity, ParsedItem } from "@/parser";
 import TradeListing from "./trade/TradeListing.vue";
 import TradeBulk from "./trade/TradeBulk.vue";
 import TradeLinks from "./trade/TradeLinks.vue";
@@ -83,10 +83,8 @@ import PricePrediction from "./price-prediction/PricePrediction.vue";
 import StackValue from "./stack-value/StackValue.vue";
 import FilterName from "./filters/FilterName.vue";
 import Tip from "../help/Tip.vue";
-import {
-  CATEGORY_TO_TRADE_ID,
-  createTradeRequest,
-} from "./trade/pathofexile-trade";
+import { createTradeRequest } from "./trade/pathofexile-trade";
+import { shouldStartInitialSearch } from "./initial-search";
 import { AppConfig, TipsFrequency } from "@/web/Config";
 import { FilterPreset } from "./filters/interfaces";
 import { PriceCheckWidget } from "../overlay/interfaces";
@@ -178,22 +176,11 @@ export default defineComponent({
           defaultAllSelected: widget.value.defaultAllSelected,
         });
 
-        if (
-          (!props.advancedCheck && !widget.value.smartInitialSearch) ||
-          (props.advancedCheck && !widget.value.lockedInitialSearch)
-        ) {
-          doSearch.value = false;
-        } else {
-          doSearch.value = Boolean(
-            item.rarity === ItemRarity.Unique ||
-              item.category === ItemCategory.HeistBlueprint ||
-              item.category === ItemCategory.SanctumRelic ||
-              item.category === ItemCategory.Charm ||
-              !CATEGORY_TO_TRADE_ID.has(item.category!) ||
-              item.isUnidentified ||
-              item.isVeiled,
-          );
-        }
+        doSearch.value = shouldStartInitialSearch(
+          item,
+          props.advancedCheck,
+          widget.value,
+        );
 
         tradeAPI.value = apiToSatisfySearch(
           props.item,

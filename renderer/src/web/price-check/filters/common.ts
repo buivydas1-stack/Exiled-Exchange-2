@@ -5,19 +5,14 @@ import {
   ParsedItem,
 } from "@/parser";
 import { EXPLICIT_MOD_TYPES, ModifierType } from "@/parser/modifiers";
+import modifierLevels from "./normal-modifier-levels.json";
 
 export function maxUsefulItemLevel(category: ItemCategory | undefined) {
-  const itemLevelCaps: Partial<Record<ItemCategory, number>> = {
-    [ItemCategory.Wand]: 81,
-    [ItemCategory.Staff]: 81,
-    [ItemCategory.Relic]: 80,
-    [ItemCategory.Tablet]: 1,
-    [ItemCategory.Jewel]: 1,
-    [ItemCategory.Map]: 1,
-  };
-
-  const maxUsefulItemLevel = category ? (itemLevelCaps[category] ?? 82) : 82;
-  return maxUsefulItemLevel;
+  if (category === ItemCategory.Map) return 1; // Waystone tier, not item level.
+  const caps: Partial<Record<ItemCategory, { level: number }>> =
+    modifierLevels.categories;
+  // Never clamp an unknown/new class to an unverified level.
+  return (category && caps[category]?.level) || Infinity;
 }
 
 export function likelyFinishedItem(item: ParsedItem) {

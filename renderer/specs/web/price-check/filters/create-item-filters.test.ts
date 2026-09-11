@@ -40,16 +40,16 @@ describe("unidentified item tests", () => {
 
     const res = createFilters(item, createTestCreateOptions());
 
-    expect(res.unidentified).toBeUndefined();
+    expect(res.unidentified).toEqual({ value: true, disabled: false });
     expect(res.unidentifiedTier).toBeTruthy();
     expect(res.unidentifiedTier!.value).toBe(4);
   });
 
   it.each([
-    [ItemRarity.Magic, true],
-    [ItemRarity.Rare, true],
+    [ItemRarity.Magic, false],
+    [ItemRarity.Rare, false],
     [ItemRarity.Unique, false],
-  ])("#. Should be enabled by default only on uniques", (rarity, disabled) => {
+  ])("#. Should be enabled by default for every rarity", (rarity, disabled) => {
     const item: ParsedItem = {
       ...createTestItem(),
       isUnidentified: true,
