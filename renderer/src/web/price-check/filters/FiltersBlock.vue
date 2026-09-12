@@ -44,22 +44,41 @@
           :text="filters.mapBlighted.value"
         />
         <filter-btn-logical
+          v-if="filters.rarity?.value === 'magic'"
+          readonly
+          :filter="{ disabled: false }"
+          text="Magic"
+        />
+        <filter-btn-logical
+          v-if="filters.rarity?.value === 'normal'"
+          readonly
+          :filter="{ disabled: false }"
+          text="Normal"
+        />
+        <filter-btn-logical
           v-if="filters.discriminator?.value"
           readonly
           :filter="{ disabled: false }"
           :text="filters.discriminator.value"
         />
-        <filter-btn-numeric
-          v-if="filters.itemLevel"
-          :filter="filters.itemLevel"
-          :name="t('item.item_level')"
-        />
-        <span
-          v-if="item.rarity"
-          data-testid="item-rarity"
-          :class="[$style.rarity, $style[item.rarity]]"
-          >{{ t(item.rarity) }}</span
+        <div
+          v-if="filters.itemLevel || item.rarity"
+          class="flex flex-col items-start gap-1 self-start"
         >
+          <filter-btn-numeric
+            v-if="filters.itemLevel"
+            :filter="filters.itemLevel"
+            :name="t('item.item_level')"
+          />
+          <span
+            v-if="item.rarity"
+            data-testid="item-rarity"
+            :class="[$style.rarity, $style[item.rarity]]"
+            :title="t(item.rarity)"
+            :aria-label="t(item.rarity)"
+            >{{ item.rarity[0] }}</span
+          >
+        </div>
         <filter-btn-numeric
           v-if="filters.requires?.level"
           :filter="filters.requires?.level"
@@ -491,8 +510,8 @@ export default defineComponent({
 
 <style lang="postcss" module>
 .rarity {
-  @apply inline-flex items-center rounded border border-current bg-gray-900 px-2;
-  @apply text-sm leading-5 whitespace-nowrap;
+  @apply inline-flex items-center justify-center w-5 h-5 shrink-0;
+  @apply border border-current bg-gray-900 text-sm leading-none;
 }
 .Normal {
   @apply text-normal;
