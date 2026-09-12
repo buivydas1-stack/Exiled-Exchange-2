@@ -73,6 +73,20 @@
           </template>
         </tbody>
       </table>
+      <div v-if="hasMore" class="p-2 shrink-0">
+        <button
+          class="btn w-full disabled:opacity-50"
+          data-testid="load-more"
+          :disabled="loadingMore"
+          :aria-busy="loadingMore"
+          @click="loadMore"
+        >
+          {{ loadingMore ? t("please_wait") : t(":load_more", [20]) }}
+        </button>
+        <p v-if="loadMoreError" class="mt-1 text-red-400" role="alert">
+          Error: {{ loadMoreError }}
+        </p>
+      </div>
       <!-- LIKELY PRICE FIXED -->
       <div
         v-if="isLikelyPriceFixed"
@@ -195,7 +209,16 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const { error, searchResult, groupedResults, search } = useTradeApi();
+    const {
+      error,
+      searchResult,
+      groupedResults,
+      search,
+      hasMore,
+      loadingMore,
+      loadMoreError,
+      loadMore,
+    } = useTradeApi();
 
     const showBrowser = inject<(url: string) => void>("builtin-browser")!;
 
@@ -235,6 +258,10 @@ export default defineComponent({
     return {
       t,
       list: searchResult,
+      hasMore,
+      loadingMore,
+      loadMoreError,
+      loadMore,
       groupedResults: computed(() => {
         if (!slowdown.isReady.value) {
           return Array<undefined>(SHOW_RESULTS);

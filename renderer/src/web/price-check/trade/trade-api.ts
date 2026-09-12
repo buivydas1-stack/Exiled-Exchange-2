@@ -13,12 +13,17 @@ import {
 const API_FETCH_LIMIT = 100;
 const MIN_NOT_GROUPED = 7;
 const MIN_GROUPED = 10;
+const LOAD_MORE_SIZE = 20;
 
 export function useTradeApi() {
   let searchId = 0;
+  let fetchNextPage: (() => Promise<void>) | undefined;
   const error = shallowRef<string | null>(null);
   const searchResult = shallowRef<SearchResult | null>(null);
   const fetchResults = shallowRef<PricingResult[]>([]);
+  const hasMore = shallowRef(false);
+  const loadingMore = shallowRef(false);
+  const loadMoreError = shallowRef<string | null>(null);
 
   const groupedResults = computed(() => {
     const out: Array<PricingResult & { listedTimes: number }> = [];
@@ -53,14 +58,17 @@ export function useTradeApi() {
     stats: StatFilter[],
     item: ParsedItem,
   ) {
+    const _searchId = ++searchId;
     try {
-      searchId += 1;
       error.value = null;
       searchResult.value = null;
+      fetchNextPage = undefined;
+      hasMore.value = false;
+      loadingMore.value = false;
+      loadMoreError.value = null;
       const _fetchResults: PricingResult[] = shallowReactive([]);
       fetchResults.value = _fetchResults;
 
-      const _searchId = searchId;
       const request = createTradeRequest(filters, stats, item);
       const _searchResult = await requestTradeResultList(
         request,
@@ -98,7 +106,18 @@ export function useTradeApi() {
         await Promise.all([r1, r2]);
       }
 
-      let fetched = 20;
+      let fetched = Math.min(20, _searchResult.result.length);
+      async function fetchNextBatch(): Promise<void> {
+        if (_searchId !== searchId) return;
+        const ids = _searchResult.result.slice(fetched, fetched + 10);
+        const results = await requestResults(_searchResult.id, ids, {
+          accountName: AppConfig().accountName,
+        });
+        if (_searchId !== searchId) return;
+        _fetchResults.push(...results);
+        // Advance by requested IDs, including listings removed since searching.
+        fetched += ids.length;
+      }
       async function fetchMore(): Promise<void> {
         if (_searchId !== searchId) return;
         const totalGrouped = groupedResults.value.length;
@@ -111,22 +130,53 @@ export function useTradeApi() {
           fetched < _searchResult.result.length &&
           fetched < API_FETCH_LIMIT
         ) {
-          await requestResults(
-            _searchResult.id,
-            _searchResult.result.slice(fetched, fetched + 10),
-            { accountName: AppConfig().accountName },
-          ).then((results) => {
-            _fetchResults.push(...results);
-          });
-          fetched += 10;
+          await fetchNextBatch();
           await fetchMore();
         }
       }
       await fetchMore();
+      if (_searchId !== searchId) return;
+      hasMore.value = fetched < _searchResult.result.length;
+      fetchNextPage = async () => {
+        const end = Math.min(
+          fetched + LOAD_MORE_SIZE,
+          _searchResult.result.length,
+        );
+        while (fetched < end) {
+          if (_searchId !== searchId) return;
+          await fetchNextBatch();
+          if (_searchId === searchId) {
+            hasMore.value = fetched < _searchResult.result.length;
+          }
+        }
+      };
     } catch (err) {
-      error.value = (err as Error).message;
+      if (_searchId === searchId) error.value = (err as Error).message;
     }
   }
 
-  return { error, searchResult, groupedResults, search };
+  async function loadMore() {
+    if (!hasMore.value || loadingMore.value || !fetchNextPage) return;
+    const _searchId = searchId;
+    loadingMore.value = true;
+    loadMoreError.value = null;
+    try {
+      await fetchNextPage();
+    } catch (err) {
+      if (_searchId === searchId) loadMoreError.value = (err as Error).message;
+    } finally {
+      if (_searchId === searchId) loadingMore.value = false;
+    }
+  }
+
+  return {
+    error,
+    searchResult,
+    groupedResults,
+    search,
+    hasMore,
+    loadingMore,
+    loadMoreError,
+    loadMore,
+  };
 }

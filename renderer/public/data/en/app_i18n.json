@@ -332,6 +332,7 @@
     "stock": "Stock",
     "fulfill": "Fulfill",
     "listed": "Listed",
+    "load_more": "Load {0} more",
     "seller": "Seller",
     "item_level": "iLvl",
     "rank": "Rank",
