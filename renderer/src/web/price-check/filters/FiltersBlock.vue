@@ -44,18 +44,6 @@
           :text="filters.mapBlighted.value"
         />
         <filter-btn-logical
-          v-if="filters.rarity?.value === 'magic'"
-          readonly
-          :filter="{ disabled: false }"
-          text="Magic"
-        />
-        <filter-btn-logical
-          v-if="filters.rarity?.value === 'normal'"
-          readonly
-          :filter="{ disabled: false }"
-          text="Normal"
-        />
-        <filter-btn-logical
           v-if="filters.discriminator?.value"
           readonly
           :filter="{ disabled: false }"
@@ -66,6 +54,12 @@
           :filter="filters.itemLevel"
           :name="t('item.item_level')"
         />
+        <span
+          v-if="item.rarity"
+          data-testid="item-rarity"
+          :class="[$style.rarity, $style[item.rarity]]"
+          >{{ t(item.rarity) }}</span
+        >
         <filter-btn-numeric
           v-if="filters.requires?.level"
           :filter="filters.requires?.level"
@@ -496,6 +490,23 @@ export default defineComponent({
 </script>
 
 <style lang="postcss" module>
+.rarity {
+  @apply inline-flex items-center rounded border border-current bg-gray-900 px-2;
+  @apply text-sm leading-5 whitespace-nowrap;
+}
+.Normal {
+  @apply text-normal;
+}
+.Magic {
+  @apply text-magic;
+}
+.Rare {
+  @apply text-rare;
+}
+.Unique {
+  @apply text-unique;
+}
+
 .presetBtn {
   @apply border-gray-700 bg-gray-800;
   @apply px-2;
