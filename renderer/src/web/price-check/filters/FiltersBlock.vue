@@ -1,7 +1,10 @@
 <template>
   <div>
-    <div class="flex justify-between">
-      <div class="flex flex-wrap items-center pb-3 gap-2">
+    <div
+      class="flex justify-between relative"
+      :class="{ 'min-h-[56px]': item.rarity }"
+    >
+      <div class="flex flex-wrap items-center self-start pb-3 gap-2">
         <filter-btn-numeric
           v-if="filters.socketNumber"
           :filter="filters.socketNumber"
@@ -61,24 +64,11 @@
           :filter="{ disabled: false }"
           :text="filters.discriminator.value"
         />
-        <div
-          v-if="filters.itemLevel || item.rarity"
-          class="flex flex-col items-start gap-1 self-start"
-        >
-          <filter-btn-numeric
-            v-if="filters.itemLevel"
-            :filter="filters.itemLevel"
-            :name="t('item.item_level')"
-          />
-          <span
-            v-if="item.rarity"
-            data-testid="item-rarity"
-            :class="[$style.rarity, $style[item.rarity]]"
-            :title="t(item.rarity)"
-            :aria-label="t(item.rarity)"
-            >{{ item.rarity[0] }}</span
-          >
-        </div>
+        <filter-btn-numeric
+          v-if="filters.itemLevel"
+          :filter="filters.itemLevel"
+          :name="t('item.item_level')"
+        />
         <filter-btn-numeric
           v-if="filters.requires?.level"
           :filter="filters.requires?.level"
@@ -178,6 +168,7 @@
       </div>
       <div
         v-if="showItemEditor !== 'none'"
+        data-testid="item-editor-selector"
         class="flex items-center bg-gray-900 rounded border border-gray-500 justify-center shrink-0 w-8 h-8"
       >
         <popover :delay="[0, 500]" placement="right">
@@ -202,6 +193,15 @@
           </template>
         </popover>
       </div>
+      <div v-else-if="item.rarity" class="w-8 shrink-0" aria-hidden="true" />
+      <span
+        v-if="item.rarity"
+        data-testid="item-rarity"
+        :class="[$style.rarity, $style[item.rarity]]"
+        :title="t(item.rarity)"
+        :aria-label="t(item.rarity)"
+        >{{ item.rarity[0] }}</span
+      >
     </div>
     <!-- Handled parse error -->
     <div
@@ -510,6 +510,7 @@ export default defineComponent({
 
 <style lang="postcss" module>
 .rarity {
+  @apply absolute right-[6px] top-9;
   @apply inline-flex items-center justify-center w-5 h-5 shrink-0;
   @apply border border-current bg-gray-900 text-sm leading-none;
 }
