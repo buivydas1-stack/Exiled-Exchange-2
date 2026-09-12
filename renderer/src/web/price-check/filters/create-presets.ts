@@ -97,7 +97,12 @@ export function createPresets(
   //   );
   // }
 
-  if (likelyFinishedItem(item) || !hasCraftingValue(item)) {
+  // Magic items default to their exact base even when the crafting heuristic
+  // would otherwise hide it (for example, low-level or 20%-quality items).
+  if (
+    item.rarity !== ItemRarity.Magic &&
+    (likelyFinishedItem(item) || !hasCraftingValue(item))
+  ) {
     return { active: pseudoPreset.id, presets: [pseudoPreset] };
   }
 
@@ -108,7 +113,7 @@ export function createPresets(
   };
 
   return {
-    active: pseudoPreset.id,
+    active: item.rarity === ItemRarity.Magic ? baseItemPreset.id : pseudoPreset.id,
     presets: [pseudoPreset, baseItemPreset],
   };
 }
