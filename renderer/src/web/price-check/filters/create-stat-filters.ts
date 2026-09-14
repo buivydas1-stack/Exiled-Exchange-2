@@ -863,11 +863,13 @@ function showHasEmptyModifier(ctx: FiltersCreationContext):
 
   if (total !== maxAmount[ItemHasEmptyModifier.Any] && total !== 0) {
     const empty =
-      suffixes === maxAmount[ItemHasEmptyModifier.Suffix]
-        ? ItemHasEmptyModifier.Prefix
-        : prefixes === maxAmount[ItemHasEmptyModifier.Prefix]
-          ? ItemHasEmptyModifier.Suffix
-          : ItemHasEmptyModifier.Any;
+      item.rarity === ItemRarity.Magic
+        ? ItemHasEmptyModifier.Any
+        : suffixes === maxAmount[ItemHasEmptyModifier.Suffix]
+          ? ItemHasEmptyModifier.Prefix
+          : prefixes === maxAmount[ItemHasEmptyModifier.Prefix]
+            ? ItemHasEmptyModifier.Suffix
+            : ItemHasEmptyModifier.Any;
 
     const counts = {
       [ItemHasEmptyModifier.Any]: maxAmount[ItemHasEmptyModifier.Any] - total,
