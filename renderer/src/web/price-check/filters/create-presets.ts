@@ -44,8 +44,10 @@ export function createPresets(
 
   if (
     item.isUnidentified ||
-    item.rarity === ItemRarity.Normal ||
-    (!item.info.craftable && item.rarity !== ItemRarity.Unique) ||
+    (item.rarity === ItemRarity.Normal && item.category !== ItemCategory.Map) ||
+    (!item.info.craftable &&
+      item.rarity !== ItemRarity.Unique &&
+      item.category !== ItemCategory.Map) ||
     ((item.category === ItemCategory.Flask ||
       item.category === ItemCategory.Relic ||
       item.category === ItemCategory.Tincture ||
@@ -113,7 +115,10 @@ export function createPresets(
   };
 
   return {
-    active: item.rarity === ItemRarity.Magic ? baseItemPreset.id : pseudoPreset.id,
+    active:
+      item.rarity === ItemRarity.Magic && item.category !== ItemCategory.Map
+        ? baseItemPreset.id
+        : pseudoPreset.id,
     presets: [pseudoPreset, baseItemPreset],
   };
 }

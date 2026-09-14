@@ -140,6 +140,13 @@ export const usePoeninja = createGlobalState(() => {
    * core/div
    */
   const xchgRate = shallowRef<number | undefined>(undefined);
+  // Keep the chaos quote independent of the user's preferred core currency.
+  const divineChaosQuote = shallowRef<{ league: string; rate: number }>();
+  const divineChaosRate = computed(() =>
+    divineChaosQuote.value?.league === leagues.selectedId.value
+      ? divineChaosQuote.value?.rate
+      : undefined,
+  );
   /**
    * Current core currency
    */
@@ -205,6 +212,13 @@ export const usePoeninja = createGlobalState(() => {
       const jsonBlob = await response.text();
 
       const ninjaXchg = parseXchg(jsonBlob);
+      const chaosRate = ninjaXchg.rates.chaos;
+      divineChaosQuote.value =
+        ninjaXchg.primary === "divine" &&
+        Number.isFinite(chaosRate) &&
+        chaosRate > 0
+          ? { league: league.id, rate: chaosRate }
+          : undefined;
 
       PRICES_DB = splitJsonBlob(jsonBlob, ninjaSchema);
 
@@ -439,6 +453,7 @@ export const usePoeninja = createGlobalState(() => {
 
   watch(leagues.selectedId, () => {
     xchgRate.value = undefined;
+    divineChaosQuote.value = undefined;
     PRICES_DB = [];
     load(true);
   });
@@ -453,6 +468,7 @@ export const usePoeninja = createGlobalState(() => {
 
   return {
     xchgRate: readonly(xchgRate),
+    divineChaosRate,
     xchgRateCurrency: readonly(selectedCoreCurrency),
     findPriceByQuery,
     autoCurrency,

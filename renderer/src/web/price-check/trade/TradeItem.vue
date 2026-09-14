@@ -11,15 +11,7 @@
         :class="{
           'line-through': false,
         }"
-        >{{ result.priceAmount }} {{ result.priceCurrency
-        }}{{
-          result.normalizedPriceCurrency &&
-          result.priceCurrency !== result.normalizedPriceCurrency.id &&
-          result.priceCurrency !== "divine" &&
-          result.normalizedPrice
-            ? ` (${result.normalizedPrice} ${result.normalizedPriceCurrency.abbrev})`
-            : ""
-        }}</span
+        >{{ listingPrice }}</span
       >
       <span
         v-if="result.listedTimes > 2"
@@ -124,6 +116,8 @@ import { AppConfig } from "@/web/Config";
 import { ItemCategory } from "@/parser";
 import TooltipItem from "./TooltipItem.vue";
 import { GEM, GRANTS_REAL_SKILL } from "@/parser/meta";
+import { usePoeninja } from "@/web/background/Prices";
+import { formatListingPrice } from "./listing-price";
 
 export default defineComponent({
   name: "TradeItem",
@@ -156,6 +150,7 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { divineChaosRate } = usePoeninja();
     const tooltipOption = computed(
       () => AppConfig<PriceCheckWidget>("price-check")!.itemHoverTooltip,
     );
@@ -218,6 +213,9 @@ export default defineComponent({
     });
     return {
       t,
+      listingPrice: computed(() =>
+        formatListingPrice(props.result, divineChaosRate.value),
+      ),
       target,
       content,
       isHovered,

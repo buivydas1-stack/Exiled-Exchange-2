@@ -22,6 +22,24 @@ function gloves(rarity: ItemRarity, itemLevel = 86) {
 }
 
 describe("initial price-check preset", () => {
+  it.each([ItemRarity.Normal, ItemRarity.Magic, ItemRarity.Rare])(
+    "defaults %s waystones to Pseudo while preserving tier",
+    (rarity) => {
+      const item = {
+        ...gloves(rarity),
+        category: ItemCategory.Map,
+        mapTier: 15,
+      };
+      const result = createPresets(item, createTestCreateOptions());
+      expect(result.active).toBe("filters.preset_pseudo");
+      const active = result.presets.find(
+        (preset) => preset.id === result.active,
+      )!;
+      expect(active.filters.mapTier).toEqual({ value: 15, disabled: false });
+      expect(active.filters.itemLevel).toBeUndefined();
+    },
+  );
+
   it.each([20, 65, 81, 82, 83, 86])(
     "starts magic gloves at ilvl %s in Base Item with capped level and magic rarity",
     (level) => {
