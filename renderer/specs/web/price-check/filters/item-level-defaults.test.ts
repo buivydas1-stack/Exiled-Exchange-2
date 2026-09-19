@@ -75,6 +75,13 @@ describe("verified normal-modifier item-level limits", () => {
     },
   );
 
+  it.each([1, 60, 83, 86, 100])("selects normal flask iLvL in the preset and query at level %s", (level) => {
+    const item = { ...base(ItemCategory.Flask, level), rarity: ItemRarity.Normal, isUnidentified: false };
+    const preset = createPresets(item, createTestCreateOptions()).presets[0];
+    expect(preset.filters.itemLevel).toEqual({ value: Math.min(level, 83), disabled: false });
+    expect(createTradeRequest(preset.filters, preset.stats, item).query.filters.type_filters?.filters.ilvl).toEqual({ min: Math.min(level, 83) });
+  });
+
   it.each([2, 4, 5])(
     "selects both Unidentified and its tier %s in the outgoing query",
     (tier) => {

@@ -397,7 +397,8 @@ export function createFilters(
         filters.itemLevel = {
           value: Math.min(item.itemLevel, usefulLevel),
           disabled:
-            item.isUnidentified && Number.isFinite(usefulLevel)
+            (item.isUnidentified && Number.isFinite(usefulLevel)) ||
+            (item.category === ItemCategory.Flask && item.rarity === ItemRarity.Normal)
               ? false
               : !opts.exact ||
                 item.category === ItemCategory.Flask ||
