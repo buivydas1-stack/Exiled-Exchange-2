@@ -847,9 +847,10 @@ export function createTradeRequest(
       );
     }
   } else if (
-    item.rarity === ItemRarity.Normal ||
-    item.rarity === ItemRarity.Magic ||
-    item.rarity === ItemRarity.Rare
+    item.category !== ItemCategory.Tablet &&
+    (item.rarity === ItemRarity.Normal ||
+      item.rarity === ItemRarity.Magic ||
+      item.rarity === ItemRarity.Rare)
   ) {
     propSet(
       query.filters,
