@@ -22,6 +22,34 @@ function gloves(rarity: ItemRarity, itemLevel = 86) {
 }
 
 describe("initial price-check preset", () => {
+  it.each([
+    [ItemRarity.Normal, "normal"],
+    [ItemRarity.Magic, "magic"],
+    [ItemRarity.Rare, "rare"],
+  ])("searches %s tablets against only %s tablets", (rarity, option) => {
+    const base = gloves(rarity);
+    const item = {
+      ...base,
+      category: ItemCategory.Tablet,
+      info: {
+        ...base.info,
+        name: "Expedition Tablet",
+        refName: "Expedition Tablet",
+        craftable: { category: ItemCategory.Tablet },
+      },
+    };
+    const result = createPresets(item, createTestCreateOptions());
+    expect(result.active).toBe("filters.preset_exact");
+    const request = createTradeRequest(
+      result.presets[0].filters,
+      result.presets[0].stats,
+      item,
+    );
+    expect(request.query.filters.type_filters?.filters.rarity).toEqual({
+      option,
+    });
+  });
+
   it.each([ItemRarity.Normal, ItemRarity.Magic, ItemRarity.Rare])(
     "defaults %s waystones to Pseudo while preserving tier",
     (rarity) => {

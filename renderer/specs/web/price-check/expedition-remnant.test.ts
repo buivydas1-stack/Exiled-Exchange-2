@@ -50,6 +50,9 @@ describe("Expedition Tablet Verisium Remnant modifier", () => {
     expect(filter?.disabled).toBe(false);
 
     const request = createTradeRequest(presets[0].filters, presets[0].stats, item);
+    expect(request.query.filters.type_filters?.filters.rarity).toEqual({
+      option: "rare",
+    });
     expect(
       request.query.stats.flatMap((group) => group.filters),
     ).toContainEqual(

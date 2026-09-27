@@ -326,6 +326,15 @@ export function createFilters(
       value: "magic",
     };
   } else if (
+    item.category === ItemCategory.Tablet &&
+    (item.rarity === ItemRarity.Normal ||
+      item.rarity === ItemRarity.Magic ||
+      item.rarity === ItemRarity.Rare)
+  ) {
+    filters.rarity = {
+      value: item.rarity.toLowerCase(),
+    };
+  } else if (
     item.rarity === ItemRarity.Normal &&
     item.info.refName !== "Idol of Estazunti" &&
     opts.exact
@@ -336,9 +345,7 @@ export function createFilters(
     };
   } else if (
     item.rarity === ItemRarity.Magic &&
-    opts.exact &&
-    // Ignore tablet since they should be compared to rare ones
-    item.category !== ItemCategory.Tablet
+    opts.exact
   ) {
     filters.rarity = {
       value: "magic",
