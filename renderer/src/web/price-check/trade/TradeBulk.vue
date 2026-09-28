@@ -7,7 +7,7 @@
     >
       <div class="flex items-center text-gray-500">
         <span class="mr-1">{{ t(":matched") }}</span>
-        <span v-if="!result" class="text-gray-600">...</span>
+        <span v-if="!result" class="text-gray-600">{{ t("please_wait") }}</span>
         <div v-else class="flex items-center">
           <button
             class="btn flex items-center mr-1"

@@ -3,7 +3,7 @@
     <div class="mb-2 flex pl-2">
       <div class="flex items-baseline text-gray-500 mr-2">
         <span class="mr-1">{{ t(":matched") }}</span>
-        <span v-if="!list" class="text-gray-600">...</span>
+        <span v-if="!list" class="text-gray-600">{{ t("please_wait") }}</span>
         <span v-else>{{ list.total }}{{ list.inexact ? "+" : "" }}</span>
       </div>
       <online-filter

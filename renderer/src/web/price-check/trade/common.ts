@@ -150,6 +150,7 @@ function _adjustRateLimits(
 export function preventQueueCreation(
   targets: Array<{ count: number; limiters: Iterable<RateLimiter> }>,
 ) {
+  const MAX_AUTO_WAIT_MS = 5000;
   const estimatedMillis = Math.max(
     ...targets.map((target) => {
       const estimated = RateLimiter.estimateTime(target.count, target.limiters);
@@ -164,7 +165,7 @@ export function preventQueueCreation(
     }),
   );
 
-  if (estimatedMillis >= 1500) {
+  if (estimatedMillis > MAX_AUTO_WAIT_MS) {
     throw new Error(
       `Retry after ${Math.round(estimatedMillis / 1000)} seconds`,
     );
