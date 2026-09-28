@@ -55,6 +55,19 @@
       </AppTitleBar>
       <div class="grow layout-column min-h-0 bg-gray-800">
         <background-info />
+        <ui-error-box v-if="priceDataError" class="mx-4 mt-2">
+          <template #name>Currency rates could not be refreshed</template>
+          <p>
+            {{
+              priceDataError === "timeout"
+                ? "The market-data download timed out. Currency estimates may be outdated."
+                : "The market-data download failed. Currency estimates may be outdated."
+            }}
+          </p>
+          <template #actions>
+            <button class="btn" @click="retryPricesFetch">Retry</button>
+          </template>
+        </ui-error-box>
         <check-position-circle
           v-if="showCheckPos"
           :position="checkPosition"
@@ -248,6 +261,8 @@ export default defineComponent({
       xchgRateCurrency,
       initialLoading: xchgRateLoading,
       queuePricesFetch,
+      retryPricesFetch,
+      priceDataError,
     } = usePoeninja();
 
     nextTick(() => {
@@ -438,6 +453,8 @@ export default defineComponent({
       stableOrbCost,
       xchgRateCurrency,
       xchgRateLoading,
+      priceDataError,
+      retryPricesFetch,
       showCheckPos,
       checkPosition,
       item,

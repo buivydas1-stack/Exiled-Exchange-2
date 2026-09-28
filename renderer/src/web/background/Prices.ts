@@ -62,6 +62,7 @@ type PriceDatabase = Array<{
 const RETRY_INTERVAL_MS = 4 * 60 * 1000;
 const UPDATE_INTERVAL_MS = 31 * 60 * 1000;
 const INTEREST_SPAN_MS = 20 * 60 * 1000;
+const DOWNLOAD_TIMEOUT_MS = 30 * 1000;
 
 interface DbQuery {
   ns: string;
@@ -161,110 +162,150 @@ export const usePoeninja = createGlobalState(() => {
   );
 
   const isLoading = shallowRef(false);
+  const priceDataError = shallowRef<"timeout" | "failed" | undefined>();
   let PRICES_DB: PriceDatabase = [];
   let lastUpdateTime = 0;
   let downloadController: AbortController | undefined;
+  let inFlight: Promise<void> | undefined;
+  let inFlightLeague: string | undefined;
   let lastInterestTime = 0;
 
   let priceCache = new Map<string, CurrencyValue>();
 
-  async function load(force: boolean = false) {
+  function load(force: boolean = false): Promise<void> {
     const league = leagues.selected.value;
-    if (!league || !league.isPopular || league.realm !== "pc-ggg") return;
+    if (!league || !league.isPopular || league.realm !== "pc-ggg") {
+      return Promise.resolve();
+    }
+    if (inFlight && inFlightLeague === league.id) return inFlight;
     if (
       !force &&
       (Date.now() - lastUpdateTime < UPDATE_INTERVAL_MS ||
         Date.now() - lastInterestTime > INTEREST_SPAN_MS)
     )
-      return;
-    if (downloadController) downloadController.abort();
-    try {
-      isLoading.value = true;
-      downloadController = new AbortController();
+      return Promise.resolve();
 
-      ITEM_DROP.value = JSON.parse(
-        await Host.proxy("api.exiledexchange2.dev/proxy/data/item-drop.json", {
-          signal: downloadController.signal,
-        }).then((r) => r.text()),
-      );
+    // Only a league change supersedes an unfinished request. Repeated item
+    // checks share the same request and its timeout.
+    if (inFlight) downloadController?.abort("superseded");
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort("timeout"),
+      DOWNLOAD_TIMEOUT_MS,
+    );
+    downloadController = controller;
+    inFlightLeague = league.id;
 
-      availableCoreCurrencies.value = getAvailableCoreCurrencies().map(
-        (currency) => ({
-          ...currency,
-          text: ITEM_BY_REF("ITEM", currency.ref)![0].name,
-        }),
-      );
-      const haveCurrency = availableCoreCurrencies.value.some(
-        (currency) => currency.id === selectedCoreCurrencyId.value,
-      );
-      if (!haveCurrency) {
-        selectedCoreCurrencyId.value = "exalted";
-      }
+    const operation = (async () => {
+      try {
+        isLoading.value = true;
 
-      const ninjaSchema: NinjaSchema = JSON.parse(
-        await Host.proxy(
-          "api.exiledexchange2.dev/proxy/data/namespaceMap.json",
+        ITEM_DROP.value = JSON.parse(
+          await Host.proxy(
+            "api.exiledexchange2.dev/proxy/data/item-drop.json",
+            {
+              signal: controller.signal,
+            },
+          ).then((r) => r.text()),
+        );
+
+        availableCoreCurrencies.value = getAvailableCoreCurrencies().map(
+          (currency) => ({
+            ...currency,
+            text: ITEM_BY_REF("ITEM", currency.ref)![0].name,
+          }),
+        );
+        const haveCurrency = availableCoreCurrencies.value.some(
+          (currency) => currency.id === selectedCoreCurrencyId.value,
+        );
+        if (!haveCurrency) {
+          selectedCoreCurrencyId.value = "exalted";
+        }
+
+        const ninjaSchema: NinjaSchema = JSON.parse(
+          await Host.proxy(
+            "api.exiledexchange2.dev/proxy/data/namespaceMap.json",
+            {
+              signal: controller.signal,
+            },
+          ).then((r) => r.text()),
+        );
+        const response = await Host.proxy(
+          `api.exiledexchange2.dev/proxy/${selectedLeagueToUrl(true)}/overviewData.json`,
           {
-            signal: downloadController.signal,
+            signal: controller.signal,
           },
-        ).then((r) => r.text()),
-      );
-      const response = await Host.proxy(
-        `api.exiledexchange2.dev/proxy/${selectedLeagueToUrl(true)}/overviewData.json`,
-        {
-          signal: downloadController.signal,
-        },
-      );
-      const jsonBlob = await response.text();
+        );
+        const jsonBlob = await response.text();
+        if (controller.signal.aborted) throw new Error("Download aborted");
 
-      const ninjaXchg = parseXchg(jsonBlob);
-      const chaosRate = ninjaXchg.rates.chaos;
-      divineChaosQuote.value =
-        ninjaXchg.primary === "divine" &&
-        Number.isFinite(chaosRate) &&
-        chaosRate > 0
-          ? { league: league.id, rate: chaosRate }
-          : undefined;
-      const exaltedRate = getExaltedChaosRate(ninjaXchg);
-      exaltedChaosQuote.value =
-        exaltedRate == null
-          ? undefined
-          : { league: league.id, rate: exaltedRate };
+        const ninjaXchg = parseXchg(jsonBlob);
+        const chaosRate = ninjaXchg.rates.chaos;
+        divineChaosQuote.value =
+          ninjaXchg.primary === "divine" &&
+          Number.isFinite(chaosRate) &&
+          chaosRate > 0
+            ? { league: league.id, rate: chaosRate }
+            : undefined;
+        const exaltedRate = getExaltedChaosRate(ninjaXchg);
+        exaltedChaosQuote.value =
+          exaltedRate == null
+            ? undefined
+            : { league: league.id, rate: exaltedRate };
 
-      PRICES_DB = splitJsonBlob(jsonBlob, ninjaSchema);
+        PRICES_DB = splitJsonBlob(jsonBlob, ninjaSchema);
 
-      // TODO: update to search for requested currency instead of divine
-      const divineRates = ninjaXchg.rates;
-      const preferred = selectedCoreCurrency.value;
+        // TODO: update to search for requested currency instead of divine
+        const divineRates = ninjaXchg.rates;
+        const preferred = selectedCoreCurrency.value;
 
-      if (divineRates && Object.values(divineRates).some((v) => v >= 10)) {
-        if (
-          preferred &&
-          preferred.id !== "div" &&
-          divineRates[preferred.id] >= 5
-        ) {
-          xchgRate.value = divineRates[preferred.id];
-          xchgRateCurrency.value = preferred.id;
-        } else {
-          xchgRate.value = divineRates.exalted;
-          xchgRateCurrency.value = "exalted";
+        if (divineRates && Object.values(divineRates).some((v) => v >= 10)) {
+          if (
+            preferred &&
+            preferred.id !== "div" &&
+            divineRates[preferred.id] >= 5
+          ) {
+            xchgRate.value = divineRates[preferred.id];
+            xchgRateCurrency.value = preferred.id;
+          } else {
+            xchgRate.value = divineRates.exalted;
+            xchgRateCurrency.value = "exalted";
+          }
+        }
+
+        // Clear cache
+        priceCache = new Map<string, CurrencyValue>();
+
+        lastUpdateTime = Date.now();
+        priceDataError.value = undefined;
+      } catch (e) {
+        if (controller.signal.reason !== "superseded") {
+          priceDataError.value =
+            controller.signal.reason === "timeout" ? "timeout" : "failed";
+          console.warn("Currency market data refresh failed", e);
+        }
+      } finally {
+        clearTimeout(timeout);
+        if (downloadController === controller) {
+          inFlight = undefined;
+          inFlightLeague = undefined;
+          downloadController = undefined;
+          isLoading.value = false;
         }
       }
-
-      // Clear cache
-      priceCache = new Map<string, CurrencyValue>();
-
-      lastUpdateTime = Date.now();
-    } catch (e) {
-      console.warn(e);
-    } finally {
-      isLoading.value = false;
-    }
+    })();
+    inFlight = operation;
+    return operation;
   }
 
   function queuePricesFetch() {
     lastInterestTime = Date.now();
     load();
+  }
+
+  function retryPricesFetch() {
+    lastInterestTime = Date.now();
+    load(true);
   }
 
   function selectedLeagueToUrl(proxy: boolean): string {
@@ -463,9 +504,11 @@ export const usePoeninja = createGlobalState(() => {
   }, RETRY_INTERVAL_MS);
 
   watch(leagues.selectedId, () => {
+    lastUpdateTime = 0;
     xchgRate.value = undefined;
     divineChaosQuote.value = undefined;
     exaltedChaosQuote.value = undefined;
+    priceDataError.value = undefined;
     PRICES_DB = [];
     load(true);
   });
@@ -473,6 +516,7 @@ export const usePoeninja = createGlobalState(() => {
   watch(selectedCoreCurrencyId, (curr, prev) => {
     if (curr === prev) return;
     xchgRateCurrency.value = curr ?? "exalted";
+    lastUpdateTime = 0;
     xchgRate.value = undefined;
     PRICES_DB = [];
     load(true);
@@ -486,6 +530,8 @@ export const usePoeninja = createGlobalState(() => {
     findPriceByQuery,
     autoCurrency,
     queuePricesFetch,
+    retryPricesFetch,
+    priceDataError: readonly(priceDataError),
     cachedCurrencyByQuery,
     initialLoading: () => isLoading.value && !PRICES_DB.length,
     availableCoreCurrencies: readonly(availableCoreCurrencies),
