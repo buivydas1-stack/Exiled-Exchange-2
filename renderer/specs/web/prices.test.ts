@@ -24,6 +24,30 @@ describe("useTradeApi", () => {
     const result = __testExports.parseXchg(blob);
 
     expect(result).toEqual(expected);
+    expect(__testExports.getExaltedChaosRate(result)).toBeCloseTo(76.2 / 2312);
+  });
+
+  it("does not show a chaos conversion without usable rates from the same divine quote", () => {
+    const base = {
+      rates: { exalted: 2312, chaos: 76.2 },
+      primary: "divine",
+      secondary: "chaos",
+    };
+    expect(
+      __testExports.getExaltedChaosRate({ ...base, primary: "exalted" }),
+    ).toBeUndefined();
+    expect(
+      __testExports.getExaltedChaosRate({
+        ...base,
+        rates: { exalted: 0, chaos: 76.2 },
+      }),
+    ).toBeUndefined();
+    expect(
+      __testExports.getExaltedChaosRate({
+        ...base,
+        rates: { exalted: 2312, chaos: NaN },
+      }),
+    ).toBeUndefined();
   });
 
   it("splitJsonBlob", () => {

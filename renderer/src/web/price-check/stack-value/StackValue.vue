@@ -9,12 +9,22 @@
         {{ value.have.amount }}
         <i class="fas fa-arrow-right text-gray-600 px-1 text-xs"></i>
         {{ value.have.price }}
+        <span
+          v-if="value.have.chaosEquivalent"
+          class="text-xs text-gray-500 whitespace-nowrap"
+          >({{ value.have.chaosEquivalent }}c)</span
+        >
       </div>
       <div class="w-1/2 pl-2" v-if="value.oneStack">
         {{ t("trade_result.stack") }} <span class="font-sans">×</span>
         {{ value.oneStack.amount }}
         <i class="fas fa-arrow-right text-gray-600 px-1 text-xs"></i>
         {{ value.oneStack.price }}
+        <span
+          v-if="value.oneStack.chaosEquivalent"
+          class="text-xs text-gray-500 whitespace-nowrap"
+          >({{ value.oneStack.chaosEquivalent }}c)</span
+        >
       </div>
     </div>
   </div>
@@ -27,6 +37,7 @@ import { usePoeninja, displayRounding } from "@/web/background/Prices";
 import { getDetailsId } from "../trends/getDetailsId";
 import { ParsedItem } from "@/parser";
 import { ItemFilters } from "../filters/interfaces";
+import { formatChaosEquivalent } from "./format-chaos-equivalent";
 
 export default defineComponent({
   props: {
@@ -40,14 +51,22 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { findPriceByQuery, autoCurrency } = usePoeninja();
+    const { findPriceByQuery, autoCurrency, exaltedChaosRate } = usePoeninja();
 
     function getPriceFor(n: number) {
       const one = findPriceByQuery(getDetailsId(props.item)!)!;
 
       const price = autoCurrency(n * one.primaryValue);
 
-      return `${displayRounding(price.min)} ${price.currency}`;
+      const chaosEquivalent =
+        price.currency === "exalted" && exaltedChaosRate.value != null
+          ? formatChaosEquivalent(price.min, exaltedChaosRate.value)
+          : undefined;
+
+      return {
+        price: `${displayRounding(price.min)} ${price.currency}`,
+        chaosEquivalent,
+      };
     }
 
     const { t } = useI18n();
@@ -62,12 +81,12 @@ export default defineComponent({
         return {
           have: {
             amount: props.filters.stackSize!.value,
-            price: getPriceFor(props.filters.stackSize!.value),
+            ...getPriceFor(props.filters.stackSize!.value),
           },
           oneStack: props.item.stackSize
             ? {
                 amount: props.item.stackSize.max,
-                price: getPriceFor(props.item.stackSize.max),
+                ...getPriceFor(props.item.stackSize.max),
               }
             : null,
         };

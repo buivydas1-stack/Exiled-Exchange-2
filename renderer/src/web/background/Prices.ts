@@ -147,6 +147,12 @@ export const usePoeninja = createGlobalState(() => {
       ? divineChaosQuote.value?.rate
       : undefined,
   );
+  const exaltedChaosQuote = shallowRef<{ league: string; rate: number }>();
+  const exaltedChaosRate = computed(() =>
+    exaltedChaosQuote.value?.league === leagues.selectedId.value
+      ? exaltedChaosQuote.value?.rate
+      : undefined,
+  );
   /**
    * Current core currency
    */
@@ -219,6 +225,11 @@ export const usePoeninja = createGlobalState(() => {
         chaosRate > 0
           ? { league: league.id, rate: chaosRate }
           : undefined;
+      const exaltedRate = getExaltedChaosRate(ninjaXchg);
+      exaltedChaosQuote.value =
+        exaltedRate == null
+          ? undefined
+          : { league: league.id, rate: exaltedRate };
 
       PRICES_DB = splitJsonBlob(jsonBlob, ninjaSchema);
 
@@ -454,6 +465,7 @@ export const usePoeninja = createGlobalState(() => {
   watch(leagues.selectedId, () => {
     xchgRate.value = undefined;
     divineChaosQuote.value = undefined;
+    exaltedChaosQuote.value = undefined;
     PRICES_DB = [];
     load(true);
   });
@@ -469,6 +481,7 @@ export const usePoeninja = createGlobalState(() => {
   return {
     xchgRate: readonly(xchgRate),
     divineChaosRate,
+    exaltedChaosRate,
     xchgRateCurrency: readonly(selectedCoreCurrency),
     findPriceByQuery,
     autoCurrency,
@@ -490,6 +503,21 @@ function parseXchg(jsonBlob: string): NinjaXchgRates {
   const startPos = jsonBlob.indexOf(RATES);
   const endPos = jsonBlob.indexOf(END_RATES, startPos) + END_RATES.length;
   return JSON.parse(jsonBlob.slice(startPos, endPos));
+}
+
+function getExaltedChaosRate(xchg: NinjaXchgRates): number | undefined {
+  const exalted = xchg.rates.exalted;
+  const chaos = xchg.rates.chaos;
+  if (
+    xchg.primary !== "divine" ||
+    !Number.isFinite(exalted) ||
+    exalted <= 0 ||
+    !Number.isFinite(chaos) ||
+    chaos <= 0
+  ) {
+    return undefined;
+  }
+  return chaos / exalted;
 }
 
 function splitJsonBlob(jsonBlob: string, schema: NinjaSchema): PriceDatabase {
@@ -586,5 +614,6 @@ export function displayRounding(
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const __testExports = {
   parseXchg,
+  getExaltedChaosRate,
   splitJsonBlob,
 };
