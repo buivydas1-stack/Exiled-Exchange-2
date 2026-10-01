@@ -526,6 +526,7 @@ export interface DisplayItem {
   implicitMods?: DisplayItemLine[];
   fracturedMods?: DisplayItemLine[];
   explicitMods?: DisplayItemLine[];
+  craftedMods?: DisplayItemLine[];
   mutatedMods?: DisplayItemLine[];
   desecratedMods?: DisplayItemLine[];
   pseudoMods?: DisplayItemLine[];

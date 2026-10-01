@@ -92,7 +92,7 @@
   </tr>
   <div ref="content">
     <!-- isHovered is mostly used here to prevent tooltip from rendering on initial load, tooltip is kinda expensive to mount -->
-    <tooltip-item :result="result" v-if="isHovered" />
+    <tooltip-item :result="result" :stats="stats" v-if="isHovered" />
   </div>
 </template>
 
@@ -107,7 +107,7 @@ import {
 } from "vue";
 import { PricingResult } from "./pathofexile-trade";
 import { ParsedItem } from "@/parser/ParsedItem";
-import { FilterNumeric } from "../filters/interfaces";
+import { FilterNumeric, StatFilter } from "../filters/interfaces";
 import { useI18nNs } from "@/web/i18n";
 import { PriceCheckWidget } from "@/web/overlay/widgets";
 import tippy, { Instance } from "tippy.js";
@@ -123,6 +123,10 @@ export default defineComponent({
   name: "TradeItem",
   components: { TooltipItem },
   props: {
+    stats: {
+      type: Array as PropType<StatFilter[]>,
+      default: () => [],
+    },
     result: {
       type: Object as PropType<
         PricingResult & {

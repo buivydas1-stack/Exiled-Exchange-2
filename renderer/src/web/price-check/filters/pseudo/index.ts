@@ -366,6 +366,16 @@ const PSEUDO_RULES: PseudoRule[] = [
   },
 ];
 
+// Tooltip consumers reuse the calculation rules without applying search defaults,
+// hiding filters, or changing which source stats remain in the search.
+export function listingPseudoRules() {
+  return PSEUDO_RULES;
+}
+
+export function resistanceElements(ref: string) {
+  return RESISTANCES_INFO.find((info) => info.ref === ref);
+}
+
 export function filterPseudo(ctx: FiltersCreationContext) {
   const filterByGroup = new Map<string, StatFilter[]>();
 

@@ -37,9 +37,11 @@
               <span class="flex-grow text-center">
                 <span
                   :class="
-                    mod.value
-                      ? 'text-gray-400'
-                      : $style[`number-color-${mod.color}`]
+                    section.key === 'calculatedPseudos'
+                      ? 'text-gray-500'
+                      : mod.value
+                        ? 'text-gray-400'
+                        : $style[`number-color-${mod.color}`]
                   "
                   >{{ translateMod(mod.text) }}</span
                 >
@@ -81,10 +83,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { PricingResult } from "./pathofexile-trade";
+import { computed, defineComponent, PropType } from "vue";
+import { PricingResult, DisplayItemLine } from "./pathofexile-trade";
 import { useI18n } from "vue-i18n";
 import UiDetailedItemImg from "@/web/ui/UiDetailedItemImg.vue";
+import { listingPseudos } from "./listing-pseudos";
+import type { StatFilter } from "../filters/interfaces";
 
 const STRIP_PERCENT_MODS = new Set([
   "item.crit",
@@ -101,6 +105,10 @@ export default defineComponent({
     UiDetailedItemImg,
   },
   props: {
+    stats: {
+      type: Array as PropType<StatFilter[]>,
+      default: () => [],
+    },
     result: {
       type: Object as PropType<PricingResult>,
       required: true,
@@ -118,53 +126,75 @@ export default defineComponent({
       return translated;
     }
 
-    const sections = item
-      ? [
-          { key: "nameBlock", content: item.nameBlock },
-          { key: "itemProps", content: item.itemProps },
-          { key: "enchantMods", content: item.enchantMods },
-          { key: "runeMods", content: item.runeMods },
-          { key: "grantedSkills", content: item.grantSkill },
-          { key: "implicitMods", content: item.implicitMods },
-          {
-            key: "explicitMods",
-            content: [
-              // ? maybe keep
-              ...(item.fracturedMods ?? []),
-              ...(item.explicitMods ?? []),
-              ...(item.desecratedMods ?? []),
-              ...(item.mutatedMods ?? []),
-              ...(item.veiledMods ?? []),
-            ],
-          },
-          { key: "pseudoMods", content: item.pseudoMods },
-        ]
-      : [];
-    // each tag gets its own section, since they are footers
-    for (const tag of item?.itemTags ?? []) {
-      sections.push({ key: tag.text, content: [tag] });
-    }
-
-    const dividerVisible = sections.map((_, index) => {
-      return (
-        sections[index].content &&
-        sections[index].content.length > 0 &&
-        sections.slice(index + 1).some((section) => {
-          const { content } = section;
-          if (!content) {
-            return false;
-          }
-
-          if (Array.isArray(content)) {
-            return content.length > 0;
-          }
-          if (typeof content === "object") {
-            return Object.values(content).some((v) => v !== undefined);
-          }
-          return false;
-        })
-      );
+    const sections = computed(() => {
+      const blocks: Array<{ key: string; content?: DisplayItemLine[] }> = item
+        ? [
+            { key: "nameBlock", content: item.nameBlock },
+            { key: "itemProps", content: item.itemProps },
+            { key: "enchantMods", content: item.enchantMods },
+            { key: "runeMods", content: item.runeMods },
+            { key: "grantedSkills", content: item.grantSkill },
+            { key: "implicitMods", content: item.implicitMods },
+            {
+              key: "explicitMods",
+              content: [
+                // ? maybe keep
+                ...(item.fracturedMods ?? []),
+                ...(item.explicitMods ?? []),
+                ...(item.desecratedMods ?? []),
+                ...(item.mutatedMods ?? []),
+                ...(item.veiledMods ?? []),
+              ],
+            },
+            { key: "pseudoMods", content: item.pseudoMods },
+            {
+              key: "calculatedPseudos",
+              content: listingPseudos(
+                item,
+                props.stats
+                  .filter((stat) => !stat.disabled)
+                  .map((stat) => stat.statRef),
+              ).map((pseudo) => ({ text: pseudo.text, color: 9 })),
+            },
+          ]
+        : [];
+      // each tag gets its own section, since they are footers
+      for (const tag of item?.itemTags ?? []) {
+        blocks.push({ key: tag.text, content: [tag] });
+      }
+      return blocks;
     });
+
+    const dividerVisible = computed(() =>
+      sections.value.map((_, index) => {
+        // Calculated totals belong directly below the original modifiers.
+        if (
+          sections.value
+            .slice(index + 1)
+            .find((section) => section.content?.length)?.key ===
+          "calculatedPseudos"
+        )
+          return false;
+        return (
+          sections.value[index].content &&
+          sections.value[index].content.length > 0 &&
+          sections.value.slice(index + 1).some((section) => {
+            const { content } = section;
+            if (!content) {
+              return false;
+            }
+
+            if (Array.isArray(content)) {
+              return content.length > 0;
+            }
+            if (typeof content === "object") {
+              return Object.values(content).some((v) => v !== undefined);
+            }
+            return false;
+          })
+        );
+      }),
+    );
 
     return {
       t,

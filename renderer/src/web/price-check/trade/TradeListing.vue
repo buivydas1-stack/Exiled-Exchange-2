@@ -65,6 +65,7 @@
               v-else
               :key="result.id"
               :result="result"
+              :stats="stats"
               :item="item"
               :show-seller="showSeller"
               :item-level="filters.itemLevel"
