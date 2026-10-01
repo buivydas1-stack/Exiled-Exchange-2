@@ -413,6 +413,18 @@ export function calculatedStatToFilter(
     filter.option = undefined;
   }
 
+  // Visage of Ayah grants fixed Eldritch Battery, not a random keystone.
+  if (
+    item.info.refName === "Visage of Ayah" &&
+    filter.statRef === "#(Ancestral Bond-Zealot's Oath)" &&
+    filter.text === "Eldritch Battery"
+  ) {
+    filter.tradeId = ["explicit.stat_2262736444"];
+    filter.statRef = "Eldritch Battery";
+    filter.tag = FilterTag.Explicit;
+    filter.option = undefined;
+  }
+
   if (type === ModifierType.Implicit) {
     if (sources.some((s) => s.modifier.info.generation === "eldritch")) {
       filter.tag = FilterTag.Eldritch;
