@@ -70,6 +70,7 @@ export let TRADE_TAG_TO_REF = new Map<string, string>();
 
 export let STAT_BY_MATCH_STR: (
   name: string,
+  preferFixed?: boolean,
 ) => { matcher: StatMatcher; stat: Stat } | undefined = () => undefined;
 export let STAT_BY_REF: (name: string) => Stat | undefined = () => undefined;
 export let STATS_ITERATOR: (
@@ -251,26 +252,39 @@ async function loadStats(language: string) {
     return JSON.parse(ndjson.slice(start, end));
   };
 
-  STAT_BY_MATCH_STR = function (matchStr: string) {
-    let start = dataBinarySearch(
-      indexMatcher,
-      Number(fnv1a(matchStr, { size: 32 })),
-      0,
-      INDEX_WIDTH,
-    );
-    if (start === -1) return undefined;
-    start = indexMatcher[start * INDEX_WIDTH + 1];
-    const end = ndjson.indexOf("\n", start);
-    const stat = JSON.parse(ndjson.slice(start, end)) as Stat;
+  STAT_BY_MATCH_STR = function (matchStr: string, preferFixed?: boolean) {
+    const hash = Number(fnv1a(matchStr, { size: 32 }));
+    let row = dataBinarySearch(indexMatcher, hash, 0, INDEX_WIDTH);
+    if (row === -1) return undefined;
 
-    const matcher = stat.matchers.find(
-      (m) => m.string === matchStr || m.advanced === matchStr,
-    );
-    if (!matcher) {
-      // console.log('fnv1a32 collision')
-      return undefined;
+    // Preserve the original choice unless item context resolves an ambiguity.
+    const originalRow = row;
+    while (row > 0 && indexMatcher[(row - 1) * INDEX_WIDTH] === hash) row -= 1;
+    let fallback: { matcher: StatMatcher; stat: Stat } | undefined;
+    let preferred: typeof fallback;
+    for (
+      ;
+      row < indexMatcher.length / INDEX_WIDTH &&
+      indexMatcher[row * INDEX_WIDTH] === hash;
+      row += 1
+    ) {
+      const start = indexMatcher[row * INDEX_WIDTH + 1];
+      const end = ndjson.indexOf("\n", start);
+      const stat = JSON.parse(ndjson.slice(start, end)) as Stat;
+      const matcher = stat.matchers.find(
+        (m) => m.string === matchStr || m.advanced === matchStr,
+      );
+      if (!matcher) continue;
+      const found = { stat, matcher };
+      if (!fallback || row === originalRow) fallback = found;
+      if (
+        preferFixed !== undefined &&
+        Boolean(stat.trade.option) !== preferFixed
+      ) {
+        preferred ??= found;
+      }
     }
-    return { stat, matcher };
+    return preferred ?? fallback;
   };
 
   STATS_ITERATOR = ndjsonFindLines<Stat>(ndjson);

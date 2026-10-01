@@ -400,31 +400,6 @@ export function calculatedStatToFilter(
     disabled,
   };
 
-  // The Knight-errant has a fixed Iron Reflexes modifier, not the
-  // random-keystone variant that shares the same displayed text.
-  if (
-    item.info.refName === "The Knight-errant" &&
-    filter.statRef === "#(Ancestral Bond-Zealot's Oath)" &&
-    filter.text === "Iron Reflexes"
-  ) {
-    filter.tradeId = ["explicit.stat_326965591"];
-    filter.statRef = "Iron Reflexes";
-    filter.tag = FilterTag.Explicit;
-    filter.option = undefined;
-  }
-
-  // Visage of Ayah grants fixed Eldritch Battery, not a random keystone.
-  if (
-    item.info.refName === "Visage of Ayah" &&
-    filter.statRef === "#(Ancestral Bond-Zealot's Oath)" &&
-    filter.text === "Eldritch Battery"
-  ) {
-    filter.tradeId = ["explicit.stat_2262736444"];
-    filter.statRef = "Eldritch Battery";
-    filter.tag = FilterTag.Explicit;
-    filter.option = undefined;
-  }
-
   if (type === ModifierType.Implicit) {
     if (sources.some((s) => s.modifier.info.generation === "eldritch")) {
       filter.tag = FilterTag.Eldritch;

@@ -369,7 +369,13 @@ function findAndResolveTranslation(
   params: FindResolveParams,
 ): { matcher: StatMatcher; stat: Stat } | undefined {
   const { matchStr } = params;
-  const statOrGroup = STAT_BY_MATCH_STR(matchStr);
+  // Fixed keystones on equipment share text with random-keystone jewel options.
+  const statOrGroup = STAT_BY_MATCH_STR(
+    matchStr,
+    params.itemCategory === undefined
+      ? undefined
+      : params.itemCategory !== ItemCategory.Jewel,
+  );
 
   return statOrGroup;
 }
