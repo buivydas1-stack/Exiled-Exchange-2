@@ -35,11 +35,13 @@ describe("listing tooltip totals", () => {
     expect(listingPseudos(ring).map((total) => total.text)).toEqual(
       expect.arrayContaining([
         "+97% total Elemental Resistance",
-        "+97% total Resistance",
         "+177 total maximum Mana",
       ]),
     );
     expect(JSON.stringify(ring)).toBe(original);
+    expect(
+      listingPseudos(ring).some((total) => total.ref === "#% total Resistance"),
+    ).toBe(false);
     expect(listingPseudos(ring)).toEqual(listingPseudos(ring));
   });
 
@@ -55,13 +57,14 @@ describe("listing tooltip totals", () => {
       expect.arrayContaining([
         "+54% total Elemental Resistance",
         "+74% total Resistance",
+        "+20% total to Chaos Resistance",
       ]),
     );
     expect(
       listingPseudos(item(["+20% to Chaos Resistance"])).map(
         (total) => total.text,
       ),
-    ).toEqual(["+20% total Resistance"]);
+    ).toEqual(["+20% total to Chaos Resistance"]);
   });
 
   it("reuses attribute contributions and displays additional selected pseudos", () => {
@@ -77,7 +80,6 @@ describe("listing tooltip totals", () => {
       expect.arrayContaining([
         "+128 total maximum Life",
         "+160 total maximum Mana",
-        "+60% total Resistance",
         "+60% total Elemental Resistance",
       ]),
     );
@@ -98,5 +100,24 @@ describe("listing tooltip totals", () => {
         (total) => total.ref === "#% total Elemental Resistance",
       ),
     ).toBe(false);
+  });
+
+  it("shows only elemental totals for the cloak, then separates chaos when present", () => {
+    const selected = ["#% total to Cold Resistance"];
+    expect(
+      listingPseudos(item(["+39% to Cold Resistance"]), selected).map(
+        (total) => total.text,
+      ),
+    ).toEqual(["+39% total Elemental Resistance"]);
+    expect(
+      listingPseudos(
+        item(["+39% to Cold Resistance", "+10% to Chaos Resistance"]),
+        selected,
+      ).map((total) => total.text),
+    ).toEqual([
+      "+10% total to Chaos Resistance",
+      "+49% total Resistance",
+      "+39% total Elemental Resistance",
+    ]);
   });
 });

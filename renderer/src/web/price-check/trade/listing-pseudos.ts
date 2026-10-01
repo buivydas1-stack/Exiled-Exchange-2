@@ -21,6 +21,7 @@ interface ListingPseudo {
 const DEFAULT_TOTALS = new Set([
   "+# total maximum Life",
   "+# total maximum Mana",
+  "#% total to Chaos Resistance",
   "#% total Resistance",
   "#% total Elemental Resistance",
 ]);
@@ -40,7 +41,13 @@ export function listingPseudos(
   }
   return totals.filter(
     (total) =>
-      DEFAULT_TOTALS.has(total.ref) || selectedRefs.includes(total.ref),
+      ![
+        "#% total to Fire Resistance",
+        "#% total to Cold Resistance",
+        "#% total to Lightning Resistance",
+        "#% total to all Elemental Resistances",
+      ].includes(total.ref) &&
+      (DEFAULT_TOTALS.has(total.ref) || selectedRefs.includes(total.ref)),
   );
 }
 
@@ -149,7 +156,13 @@ function calculateTotals(item: DisplayItem): ListingPseudo[] {
       translation.dp ?? false,
     );
     let text = translation.string.trim().replace("#", String(value));
-    if (rule.pseudo === "#% total Elemental Resistance" && value > 0)
+    if (
+      [
+        "#% total Elemental Resistance",
+        "#% total to Chaos Resistance",
+      ].includes(rule.pseudo) &&
+      value > 0
+    )
       text = `+${text}`;
     totals.push({ ref: rule.pseudo, text });
   }
@@ -157,15 +170,22 @@ function calculateTotals(item: DisplayItem): ListingPseudo[] {
   const resistanceSources = sources.filter((source) =>
     resistanceElements(source.stat.stat.ref),
   );
-  if (resistanceSources.length && !supplied.has("#% total Resistance")) {
-    const value = resistanceSources.reduce((sum, source) => {
+  const resistanceTotals = resistanceSources.reduce(
+    (sum, source) => {
       const info = resistanceElements(source.stat.stat.ref)!;
-      return (
-        sum +
-        source.contributes!.value *
-          (info.elements.length + (info.chaos ? 1 : 0))
-      );
-    }, 0);
+      sum.elemental += source.contributes!.value * info.elements.length;
+      sum.chaos += info.chaos ? source.contributes!.value : 0;
+      return sum;
+    },
+    { elemental: 0, chaos: 0 },
+  );
+  // A combined total only adds information when both types contribute.
+  if (
+    resistanceTotals.elemental &&
+    resistanceTotals.chaos &&
+    !supplied.has("#% total Resistance")
+  ) {
+    const value = resistanceTotals.elemental + resistanceTotals.chaos;
     if (value)
       totals.push({
         ref: "#% total Resistance",
