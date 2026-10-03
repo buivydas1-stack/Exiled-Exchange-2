@@ -711,6 +711,9 @@ export function propToFilter(
     },
     ctx.searchInRange,
     ctx.item,
+    true,
+    // Waystone totals have no modifier bounds; use the configured tolerance.
+    ctx.item.category === ItemCategory.Map && opts.tradeId !== "item.map_revives",
   );
 
   filter.tag = FilterTag.Property;

@@ -178,6 +178,7 @@ export default defineComponent({
           collapseListings: "app",
           activateStockFilter: true,
           searchStatRange: 10,
+          mapStatRange: 0,
           useEn: true,
           currency: undefined,
           listingType: undefined,

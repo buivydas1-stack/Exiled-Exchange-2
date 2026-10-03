@@ -82,6 +82,22 @@
         }}</ui-radio>
       </div>
     </div>
+    <div class="mb-2">
+      <div class="flex-1 mb-1">{{ t(":fill_rolls_maps") }}</div>
+      <div class="mb-4 flex">
+        <div class="flex mr-6">
+          <span class="mr-1">+-</span>
+          <input
+            v-model.number="mapStatRange"
+            class="rounded bg-gray-900 px-1 block w-16 mb-1 font-poe text-center"
+          />
+          <span class="ml-1">%</span>
+        </div>
+        <ui-radio v-model="mapStatRange" :value="0">{{
+          t(":fill_roll_exact")
+        }}</ui-radio>
+      </div>
+    </div>
     <div class="mb-4">
       <div class="flex-1 mb-1">{{ t(":core_currency") }}</div>
       <div class="mb-1 flex">
@@ -377,6 +393,17 @@ export default defineComponent({
             Math.max(value, 0.5),
             10,
           );
+        },
+      }),
+      mapStatRange: computed<number>({
+        get() {
+          return configWidget.value.mapStatRange;
+        },
+        set(value) {
+          if (typeof value !== "number") return;
+          if (value >= 0 && value <= 50) {
+            configWidget.value.mapStatRange = value;
+          }
         },
       }),
       defaultAllSelected: configModelValue(

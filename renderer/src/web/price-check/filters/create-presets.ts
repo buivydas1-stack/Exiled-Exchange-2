@@ -26,10 +26,17 @@ export function createPresets(
     collapseListings: "app" | "api";
     activateStockFilter: boolean;
     searchStatRange: number;
+    mapStatRange?: number;
     useEn: boolean;
     defaultAllSelected: boolean;
   },
 ): { presets: FilterPreset[]; active: string } {
+  if (
+    item.category === ItemCategory.Map ||
+    item.category === ItemCategory.Tablet
+  ) {
+    opts = { ...opts, searchStatRange: opts.mapStatRange ?? 0 };
+  }
   // logbooks aren't real anymore
   if (item.info.refName === "logbook here") {
     return {

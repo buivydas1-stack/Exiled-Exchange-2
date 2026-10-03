@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { setupTests } from "@specs/vitest.setup";
 import { init } from "@/assets/data";
-import { parseClipboard } from "@/parser";
+import { ItemCategory, parseClipboard } from "@/parser";
 import { createPresets } from "@/web/price-check/filters/create-presets";
 import { createTradeRequest } from "@/web/price-check/trade/pathofexile-trade";
 import { createTestCreateOptions } from "@specs/helper";
@@ -61,5 +61,61 @@ describe("rare Ritual Tablet trade query", () => {
         .flatMap((group) => group.filters)
         .filter((filter) => !filter.disabled),
     ).toHaveLength(8);
+  });
+
+  it.each([0, 10, 25])(
+    "uses the separate %s%% range and preserves uses remaining",
+    (mapStatRange) => {
+      const item = parseClipboard(tablet)._unsafeUnwrap();
+      const { presets } = createPresets(item, {
+        ...createTestCreateOptions(),
+        searchStatRange: 50,
+        mapStatRange,
+      });
+      const stats = presets[0].stats;
+      const experience = stats.find((stat) => stat.roll?.value === 13)!;
+      expect(experience.roll?.min).toBe(
+        Math.max(12, Math.floor(13 * (1 - mapStatRange / 100))),
+      );
+      expect(experience.roll?.max).toBeUndefined();
+      expect(
+        stats.find((stat) => stat.statRef === "# uses remaining")?.roll?.min,
+      ).toBe(10);
+      expect(
+        stats.find((stat) => stat.text.includes("additional Strongbox"))?.roll
+          ?.min,
+      ).toBe(1);
+    },
+  );
+
+  it("keeps the original range for equipment independently of the new setting", () => {
+    const item = parseClipboard(tablet)._unsafeUnwrap();
+    item.category = ItemCategory.Gloves;
+    item.info.craftable = { category: ItemCategory.Gloves };
+    const { active, presets } = createPresets(item, {
+      ...createTestCreateOptions(),
+      searchStatRange: 10,
+      mapStatRange: 50,
+    });
+    expect(
+      presets
+        .find((preset) => preset.id === active)
+        ?.stats.find((stat) => stat.roll?.value === 38)?.roll?.min,
+    ).toBe(34);
+  });
+
+  it("applies the tablet setting to a perfect magic modifier roll", () => {
+    const item = parseClipboard(
+      tablet
+        .replace("Rarity: Rare", "Rarity: Magic")
+        .replace("13(12-18)", "18(12-18)"),
+    )._unsafeUnwrap();
+    const { presets } = createPresets(item, {
+      ...createTestCreateOptions(),
+      mapStatRange: 10,
+    });
+    expect(
+      presets[0].stats.find((stat) => stat.roll?.value === 18)?.roll?.min,
+    ).toBe(16);
   });
 });

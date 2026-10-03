@@ -160,6 +160,7 @@ export default defineComponent({
           collapseListings: widget.value.collapseListings,
           activateStockFilter: widget.value.activateStockFilter,
           searchStatRange: widget.value.searchStatRange,
+          mapStatRange: widget.value.mapStatRange,
           useEn:
             (AppConfig().language === "cmn-Hant" &&
               AppConfig().realm === "pc-ggg") ||

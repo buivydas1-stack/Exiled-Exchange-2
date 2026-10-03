@@ -503,6 +503,7 @@ function upgradeConfig(_config: Config): Config {
     priceCheck.rememberCurrency = false;
   }
   priceCheck.modifierExclusions ??= "";
+  priceCheck.mapStatRange ??= 0;
 
   for (const widget of config.widgets) {
     if (widget.wmType === "stash-search") {

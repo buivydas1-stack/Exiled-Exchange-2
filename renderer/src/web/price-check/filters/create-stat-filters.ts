@@ -38,12 +38,16 @@ export interface FiltersCreationContext {
 export function createExactStatFilters(
   item: ParsedItem,
   statsByType: StatCalculated[],
-  opts: { searchStatRange: number; defaultAllSelected: boolean },
+  opts: {
+    searchStatRange: number;
+    mapStatRange?: number;
+    defaultAllSelected: boolean;
+  },
 ): StatFilter[] {
   performance.mark("create-exact-filters-start");
   let searchInRange = Math.min(2, opts.searchStatRange);
   if (item.category === ItemCategory.Tablet) {
-    searchInRange = 0;
+    searchInRange = opts.mapStatRange ?? 0;
   }
 
   if (item.mapBlighted || item.category === ItemCategory.Invitation) return [];
@@ -354,6 +358,7 @@ export function calculatedStatToFilter(
   percent: number,
   item: ParsedItem,
   disabled: boolean = true,
+  ignoreRollBounds: boolean = false,
 ): StatFilter {
   const { stat, sources, type } = calc;
   let filter: StatFilter;
@@ -469,6 +474,7 @@ export function calculatedStatToFilter(
 
     if (
       (item.rarity === ItemRarity.Magic &&
+        item.category !== ItemCategory.Tablet &&
         (item.isUnmodifiable || !itemIsModifiable(item))) ||
       stat.ref === "Has # Charm Slot"
     ) {
@@ -489,7 +495,7 @@ export function calculatedStatToFilter(
           roll.value >= roll.max) ||
         (calc.stat.better === StatBetter.NegativeRoll &&
           roll.value <= roll.min);
-      if (perfectRoll) {
+      if (perfectRoll && item.category !== ItemCategory.Tablet) {
         percent = 0;
       }
     }
@@ -530,8 +536,10 @@ export function calculatedStatToFilter(
               max: percentRoll(roll.value, +percent, Math.ceil, dp),
             };
 
-    filterDefault.min = Math.max(filterDefault.min, filterBounds.min);
-    filterDefault.max = Math.min(filterDefault.max, filterBounds.max);
+    if (!ignoreRollBounds) {
+      filterDefault.min = Math.max(filterDefault.min, filterBounds.min);
+      filterDefault.max = Math.min(filterDefault.max, filterBounds.max);
+    }
 
     filter.roll = {
       value: roundRoll(roll.value, dp),
@@ -728,6 +736,11 @@ export function finalFilterTweaks(ctx: FiltersCreationContext) {
       // never hide uses remaining on tablets, even unique ones
       if (filter.statRef === "# uses remaining") {
         filter.hidden = undefined;
+        if (filter.roll) {
+          filter.roll.min = filter.roll.value;
+          filter.roll.default.min = filter.roll.value;
+          filter.roll.default.max = filter.roll.value;
+        }
       }
     }
     if (filter.sources.some((s) => s.stat.fromAddedAugment)) {

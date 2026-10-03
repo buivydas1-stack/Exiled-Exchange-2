@@ -22,6 +22,38 @@ function gloves(rarity: ItemRarity, itemLevel = 86) {
 }
 
 describe("initial price-check preset", () => {
+  it.each([0, 5, 20])(
+    "uses the separate %s%% waystone range with an empty maximum",
+    (mapStatRange) => {
+      const item = {
+        ...gloves(ItemRarity.Rare),
+        category: ItemCategory.Map,
+        mapTier: 15,
+        mapPackSize: 40,
+        mapEffectiveness: 60,
+        mapMonsterRarity: 100,
+        mapRevives: 6,
+      };
+      const { active, presets } = createPresets(item, {
+        ...createTestCreateOptions(),
+        searchStatRange: 50,
+        mapStatRange,
+      });
+      const preset = presets.find((preset) => preset.id === active)!;
+      for (const value of [40, 60, 100]) {
+        const filter = preset.stats.find((stat) => stat.roll?.value === value)!;
+        expect(filter.roll?.min).toBe(
+          Math.floor(value * (1 - mapStatRange / 100)),
+        );
+        expect(filter.roll?.max).toBeUndefined();
+      }
+      expect(preset.filters.mapTier?.value).toBe(15);
+      expect(
+        preset.stats.find((stat) => stat.roll?.value === 6)?.roll?.min,
+      ).toBe(6);
+    },
+  );
+
   it.each([
     [ItemRarity.Normal, "normal"],
     [ItemRarity.Magic, "magic"],
