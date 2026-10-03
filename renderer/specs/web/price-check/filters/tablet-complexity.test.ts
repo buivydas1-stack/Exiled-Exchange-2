@@ -104,7 +104,7 @@ describe("rare Ritual Tablet trade query", () => {
     ).toBe(34);
   });
 
-  it("applies the tablet setting to a perfect magic modifier roll", () => {
+  it("uses the exact minimum for a perfect magic modifier roll", () => {
     const item = parseClipboard(
       tablet
         .replace("Rarity: Rare", "Rarity: Magic")
@@ -116,6 +116,6 @@ describe("rare Ritual Tablet trade query", () => {
     });
     expect(
       presets[0].stats.find((stat) => stat.roll?.value === 18)?.roll?.min,
-    ).toBe(16);
+    ).toBe(18);
   });
 });

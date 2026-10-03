@@ -26,6 +26,7 @@ import { filterItemProp, filterBasePercentile } from "./pseudo/item-property";
 import { decodeOils, applyAnointmentRules } from "./pseudo/anointments";
 import { StatBetter, CLIENT_STRINGS, CATALYST_TYPES } from "@/assets/data";
 import { explicitModifierCount, maxUsefulItemLevel } from "./common";
+import { isMapOrTablet, isVerifiedPerfectMapRoll } from "./map-roll-ranges";
 import { getMaxSockets } from "@/parser/Parser";
 
 export interface FiltersCreationContext {
@@ -361,6 +362,7 @@ export function calculatedStatToFilter(
   ignoreRollBounds: boolean = false,
 ): StatFilter {
   const { stat, sources, type } = calc;
+  const mapTolerance = isMapOrTablet(item) ? percent : undefined;
   let filter: StatFilter;
 
   const roll = statSourcesTotal(
@@ -539,6 +541,30 @@ export function calculatedStatToFilter(
     if (!ignoreRollBounds) {
       filterDefault.min = Math.max(filterDefault.min, filterBounds.min);
       filterDefault.max = Math.min(filterDefault.max, filterBounds.max);
+    }
+
+    // Only change the minimum for Waystones/Tablets. Other items and maximums
+    // retain their existing behavior, including unknown/unsupported modifiers.
+    if (
+      mapTolerance !== undefined &&
+      type !== ModifierType.Pseudo &&
+      !translation.negate &&
+      calc.stat.better === StatBetter.PositiveRoll
+    ) {
+      filterDefault.min = isVerifiedPerfectMapRoll(calc, item)
+        ? roundRoll(roll.value, dp)
+        : item.rarity === ItemRarity.Unique && roll.min !== roll.max
+          ? percentRollDelta(
+              roll.value,
+              roll.max - roll.min,
+              -mapTolerance,
+              Math.floor,
+              dp,
+            )
+          : percentRoll(roll.value, -mapTolerance, Math.floor, dp);
+      if (roll.min !== roll.max) {
+        filterDefault.min = Math.max(filterDefault.min, filterBounds.min);
+      }
     }
 
     filter.roll = {
