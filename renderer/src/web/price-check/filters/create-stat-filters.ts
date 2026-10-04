@@ -567,6 +567,25 @@ export function calculatedStatToFilter(
       }
     }
 
+    // Jewel totals are perfect only when every contributing copied range is
+    // known and at its maximum. Change the minimum without tightening the maximum.
+    if (
+      item.category === ItemCategory.Jewel &&
+      type !== ModifierType.Pseudo &&
+      !translation.negate &&
+      calc.stat.better === StatBetter.PositiveRoll &&
+      calc.sources.length > 0 &&
+      calc.sources.every(
+        ({ contributes, stat }) =>
+          contributes !== undefined &&
+          (contributes.min !== contributes.max ||
+            stat.translation.value !== undefined) &&
+          contributes.value === contributes.max,
+      )
+    ) {
+      filterDefault.min = roundRoll(roll.value, dp);
+    }
+
     filter.roll = {
       value: roundRoll(roll.value, dp),
       min: undefined,
