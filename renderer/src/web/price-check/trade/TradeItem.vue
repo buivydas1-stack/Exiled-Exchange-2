@@ -154,7 +154,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { divineChaosRate } = usePoeninja();
+    const { divineChaosRate, exaltedChaosRate } = usePoeninja();
     const tooltipOption = computed(
       () => AppConfig<PriceCheckWidget>("price-check")!.itemHoverTooltip,
     );
@@ -218,7 +218,11 @@ export default defineComponent({
     return {
       t,
       listingPrice: computed(() =>
-        formatListingPrice(props.result, divineChaosRate.value),
+        formatListingPrice(
+          props.result,
+          divineChaosRate.value,
+          exaltedChaosRate.value,
+        ),
       ),
       target,
       content,

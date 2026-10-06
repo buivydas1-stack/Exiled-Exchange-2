@@ -54,7 +54,8 @@ export function* linesToStatStrings(
       continue;
     }
 
-    for (let end = start; end < lines.length; end += 1) {
+    // Prefer a complete multiline stat over a generic stat matching its first line.
+    for (let end = lines.length - 1; end >= start; end -= 1) {
       let str = lines.slice(start, end + 1).join("\n");
 
       const unscalable = str.endsWith(_$.UNSCALABLE_VALUE);

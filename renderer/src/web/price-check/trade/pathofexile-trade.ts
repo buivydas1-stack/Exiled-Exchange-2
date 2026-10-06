@@ -556,6 +556,7 @@ export interface PricingResult {
   priceCurrencyRank?: number;
   normalizedPrice?: string;
   normalizedPriceCurrency?: CoreCurrency;
+  priceInDivines?: number;
   isMine: boolean;
   hasNote: boolean;
   isInstantBuyout: boolean;
@@ -1307,7 +1308,8 @@ export async function requestResults(
   resultIds: string[],
   opts: { accountName: string },
 ): Promise<PricingResult[]> {
-  const { cachedCurrencyByQuery, xchgRateCurrency } = usePoeninja();
+  const { cachedCurrencyByQuery, findPriceByQuery, xchgRateCurrency } =
+    usePoeninja();
   // Solves cached results showing random incorrect values
   cache.purgeIfDifferentCurrency(xchgRateCurrency.value?.id);
 
@@ -1366,6 +1368,11 @@ export async function requestResults(
       query,
       result.listing.price?.amount ?? 0,
     );
+    // Keep the full quote before automatic unit selection and display rounding.
+    const currencyQuote = findPriceByQuery(query);
+    const priceInDivines = currencyQuote
+      ? currencyQuote.primaryValue * (result.listing.price?.amount ?? 0)
+      : undefined;
     const normalizedPrice =
       normalizedCurrency !== undefined
         ? displayRounding(normalizedCurrency.min)
@@ -1403,6 +1410,7 @@ export async function requestResults(
       priceCurrencyRank,
       normalizedPrice,
       normalizedPriceCurrency,
+      priceInDivines,
       hasNote: result.item.note != null,
       isMine: result.listing.account.name === opts.accountName,
       isInstantBuyout: result.listing.fee != null,

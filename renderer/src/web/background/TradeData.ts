@@ -1,6 +1,7 @@
 import { readonly, shallowRef } from "vue";
 import { createGlobalState } from "@vueuse/core";
 import { Host } from "@/web/background/IPC";
+import { normalizeStatText } from "@/assets/normalize-stat-text.mjs";
 
 // from Prices.ts, but longer periods since maybe would slowdown ui more
 const RETRY_INTERVAL_MS = 30 * 60 * 1000; // 30 min, try to get new stuff
@@ -68,11 +69,12 @@ export const useTradeData = createGlobalState(() => {
 
     for (const { id: modType, entries } of rawStatsData.result) {
       for (const { id: statId, text: matcher } of entries) {
-        let modMap = outStatData.get(matcher);
+        const matchText = normalizeStatText(matcher);
+        let modMap = outStatData.get(matchText);
 
         if (!modMap) {
           modMap = {};
-          outStatData.set(matcher, modMap);
+          outStatData.set(matchText, modMap);
         }
 
         let statIds = modMap[modType];

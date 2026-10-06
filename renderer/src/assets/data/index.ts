@@ -1,4 +1,5 @@
 import fnv1a from "@sindresorhus/fnv1a";
+import { normalizeStatText } from "../normalize-stat-text.mjs";
 import type {
   BaseType,
   DropEntry,
@@ -253,6 +254,7 @@ async function loadStats(language: string) {
   };
 
   STAT_BY_MATCH_STR = function (matchStr: string, preferFixed?: boolean) {
+    matchStr = normalizeStatText(matchStr);
     const hash = Number(fnv1a(matchStr, { size: 32 }));
     let row = dataBinarySearch(indexMatcher, hash, 0, INDEX_WIDTH);
     if (row === -1) return undefined;
@@ -272,7 +274,10 @@ async function loadStats(language: string) {
       const end = ndjson.indexOf("\n", start);
       const stat = JSON.parse(ndjson.slice(start, end)) as Stat;
       const matcher = stat.matchers.find(
-        (m) => m.string === matchStr || m.advanced === matchStr,
+        (m) =>
+          normalizeStatText(m.string) === matchStr ||
+          (m.advanced !== undefined &&
+            normalizeStatText(m.advanced) === matchStr),
       );
       if (!matcher) continue;
       const found = { stat, matcher };
@@ -621,7 +626,7 @@ async function loadTradeData() {
 
     const statData = trade.tradeStatData.value;
 
-    const stat = statData.get(name);
+    const stat = statData.get(normalizeStatText(name));
     if (!stat) return;
 
     // never going to write to these, just need to satisfy type

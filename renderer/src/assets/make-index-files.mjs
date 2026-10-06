@@ -3,6 +3,7 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import fs from "fs";
 import path from "path";
+import { normalizeStatText } from "./normalize-stat-text.mjs";
 
 const LANGUAGES = ["en", "ru", "cmn-Hant", "ko", "ja", "de", "es", "pt", "fr"];
 
@@ -30,12 +31,14 @@ for (const lang of LANGUAGES) {
       for (const matcher of stat.matchers) {
         lineStarts.matchers.push({
           start,
-          hash: Number(fnv1a(matcher.string, { size: 32 })),
+          hash: Number(fnv1a(normalizeStatText(matcher.string), { size: 32 })),
         });
         if (matcher.advanced) {
           lineStarts.matchers.push({
             start,
-            hash: Number(fnv1a(matcher.advanced, { size: 32 })),
+            hash: Number(
+              fnv1a(normalizeStatText(matcher.advanced), { size: 32 }),
+            ),
           });
         }
       }

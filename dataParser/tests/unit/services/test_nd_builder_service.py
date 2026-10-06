@@ -6,6 +6,66 @@ import pytest
 from services.nd_builder_service import NdBuilderService
 
 
+def test_unique_items_keep_trade_names_when_words_are_missing():
+    service = object.__new__(NdBuilderService)
+    service.ref_trade_store = MagicMock()
+    service.game_store = MagicMock()
+    service.ref_trade_store.items.return_value = pd.DataFrame(
+        [
+            {"name": "Reverie", "type": "Shaman Mantle", "unique": True},
+            {"name": "Reverie", "type": "Runemastered Shaman Mantle", "unique": True},
+            {"name": "Redemption", "type": "Trarthan Cannon", "unique": True},
+        ]
+    )
+    service.game_store.get.return_value = pd.DataFrame(
+        [{"Text": "Redemption", "Text2": "Localized Redemption"}]
+    )
+    service.get_items_base_types = MagicMock(
+        return_value=pd.DataFrame(
+            [
+                {"type": "Shaman Mantle", "Name": "Shaman Mantle"},
+                {"type": "Runemastered Shaman Mantle", "Name": "Runemastered Shaman Mantle"},
+                {"type": "Trarthan Cannon", "Name": "Trarthan Cannon"},
+            ]
+        )
+    )
+
+    result = service.unique_items()
+    renamed = result.loc[result["refName"] == "Reverie"]
+    assert renamed["name"].tolist() == ["Reverie", "Reverie"]
+    assert renamed["unique"].tolist() == [
+        {"base": "Shaman Mantle"},
+        {"base": "Runemastered Shaman Mantle"},
+    ]
+    assert result.loc[result["refName"] == "Redemption", "name"].tolist() == [
+        "Localized Redemption"
+    ]
+
+
+def test_extra_trade_matchers_preserve_game_wording_without_duplicates():
+    service = object.__new__(NdBuilderService)
+    service.stats_combined_df = MagicMock(
+        return_value=pd.DataFrame(
+            [{"ref": "+1 to Armour per Strength", "text": "+1 to Armour per Strength", "type": "explicit"}]
+        )
+    )
+    source = pd.DataFrame(
+        [
+            {"ref": "+1 to Armour per Strength", "matchers": [{"string": "1 to Armour per Strength"}]},
+            {"ref": "unrelated", "matchers": [{"string": "unchanged"}]},
+        ]
+    )
+
+    result = service.fill_in_missing_matchers(source.copy())
+    assert result.iloc[0]["matchers"] == [
+        {"string": "1 to Armour per Strength"},
+        {"string": "+1 to Armour per Strength"},
+    ]
+    assert result.iloc[1]["matchers"] == source.iloc[1]["matchers"]
+    repeated = service.fill_in_missing_matchers(result.copy())
+    assert repeated.iloc[0]["matchers"] == result.iloc[0]["matchers"]
+
+
 def setup_stats_combined_df_tests(ref_df, lang_df):
     service = NdBuilderService("ru", "new")
     mock_ref_trade_store = MagicMock()

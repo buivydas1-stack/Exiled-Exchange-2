@@ -51,16 +51,17 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { findPriceByQuery, autoCurrency, exaltedChaosRate } = usePoeninja();
+    const { findPriceByQuery, autoCurrency, divineChaosRate } = usePoeninja();
 
     function getPriceFor(n: number) {
       const one = findPriceByQuery(getDetailsId(props.item)!)!;
 
-      const price = autoCurrency(n * one.primaryValue);
+      const valueInDivines = n * one.primaryValue;
+      const price = autoCurrency(valueInDivines);
 
       const chaosEquivalent =
-        price.currency === "exalted" && exaltedChaosRate.value != null
-          ? formatChaosEquivalent(price.min, exaltedChaosRate.value)
+        price.currency !== "chaos"
+          ? formatChaosEquivalent(valueInDivines, divineChaosRate.value)
           : undefined;
 
       return {

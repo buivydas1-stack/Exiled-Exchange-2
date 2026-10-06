@@ -1,33 +1,26 @@
-import { displayRounding } from "@/web/background/Prices";
+import { formatChaosEquivalent } from "../stack-value/format-chaos-equivalent";
 import type { PricingResult } from "./pathofexile-trade";
 
 export function formatListingPrice(
   result: Pick<
     PricingResult,
-    | "priceAmount"
-    | "priceCurrency"
-    | "normalizedPrice"
-    | "normalizedPriceCurrency"
+    "priceAmount" | "priceCurrency" | "priceInDivines"
   >,
   divineChaosRate?: number,
+  exaltedChaosRate?: number,
 ): string {
-  if (result.priceCurrency === "divine") {
-    const chaos =
-      divineChaosRate == null ? NaN : result.priceAmount * divineChaosRate;
-    const equivalent =
-      Number.isFinite(divineChaosRate) &&
-      divineChaosRate! > 0 &&
-      Number.isFinite(chaos) &&
-      chaos >= 0
-        ? ` (${displayRounding(chaos)}c)`
-        : "";
-    return `${result.priceAmount} Div${equivalent}`;
-  }
-  const equivalent =
-    result.normalizedPriceCurrency &&
-    result.priceCurrency !== result.normalizedPriceCurrency.id &&
-    result.normalizedPrice
-      ? ` (${result.normalizedPrice} ${result.normalizedPriceCurrency.abbrev})`
-      : "";
-  return `${result.priceAmount} ${result.priceCurrency}${equivalent}`;
+  const chaos =
+    result.priceCurrency === "chaos"
+      ? undefined
+      : result.priceCurrency === "divine"
+        ? formatChaosEquivalent(result.priceAmount, divineChaosRate)
+        : result.priceCurrency === "exalted"
+          ? formatChaosEquivalent(result.priceAmount, exaltedChaosRate)
+          : result.priceInDivines !== undefined
+            ? formatChaosEquivalent(result.priceInDivines, divineChaosRate)
+            : undefined;
+  const equivalent = chaos === undefined ? "" : ` (${chaos}c)`;
+  const currency =
+    result.priceCurrency === "divine" ? "Div" : result.priceCurrency;
+  return `${result.priceAmount} ${currency}${equivalent}`;
 }

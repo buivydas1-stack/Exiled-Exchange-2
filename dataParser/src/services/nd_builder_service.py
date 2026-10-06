@@ -20,6 +20,7 @@ from constants.filenames import (
     WORDS,
 )
 from constants.known_stats import (
+    EXTRA_TRADE_MATCHERS,
     SAME_TRANSLATIONS_DIFFERENT_STATS,
     TRADE_INVERTED,
     UNIQUE_ITEMS_FIXED_STATS,
@@ -382,7 +383,18 @@ class NdBuilderService:
 
         named_unique_items = unique_items.merge(
             words[["Text", "Text2"]], left_on="name", right_on="Text", how="left"
-        )[["type", "namespace", "Text2", "Text"]].rename(
+        )
+        # A renamed unique can reach the trade API before the Words table.
+        # Keep its verified reference name usable until a translation is available.
+        named_unique_items["Text"] = named_unique_items["Text"].fillna(
+            named_unique_items["name"]
+        )
+        named_unique_items["Text2"] = named_unique_items["Text2"].fillna(
+            named_unique_items["name"]
+        )
+        named_unique_items = named_unique_items[
+            ["type", "namespace", "Text2", "Text"]
+        ].rename(
             {"Text2": "name", "Text": "refName"}, axis=1
         )
 
@@ -475,6 +487,16 @@ class NdBuilderService:
         ref_matchers_dict = trade_stats_df.set_index("ref")["matchers"].to_dict()
 
         def update_matchers(row):
+            if (
+                isinstance(row["matchers"], list)
+                and row["ref"] in EXTRA_TRADE_MATCHERS
+                and row["ref"] in ref_matchers_dict
+            ):
+                return row["matchers"] + [
+                    matcher
+                    for matcher in ref_matchers_dict[row["ref"]]
+                    if matcher not in row["matchers"]
+                ]
             if isinstance(row["matchers"], list) and len(row["matchers"]) == 0:
                 # Check if ref is in the dictionary
                 if row["ref"] in ref_matchers_dict:

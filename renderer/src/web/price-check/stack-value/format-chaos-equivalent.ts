@@ -1,22 +1,18 @@
-import { displayRounding } from "@/web/background/Prices";
-
 export function formatChaosEquivalent(
-  exaltedAmount: number,
-  exaltedChaosRate?: number,
+  amount: number,
+  chaosRate?: number,
 ): string | undefined {
   if (
-    exaltedChaosRate == null ||
-    !Number.isFinite(exaltedChaosRate) ||
-    exaltedChaosRate <= 0 ||
-    !Number.isFinite(exaltedAmount) ||
-    exaltedAmount < 0
+    chaosRate == null ||
+    !Number.isFinite(chaosRate) ||
+    chaosRate <= 0 ||
+    !Number.isFinite(amount) ||
+    amount < 0
   ) {
     return undefined;
   }
 
-  const chaos = exaltedAmount * exaltedChaosRate;
+  const chaos = amount * chaosRate;
   if (!Number.isFinite(chaos)) return undefined;
-  return chaos > 0 && chaos < 0.1
-    ? Number(chaos.toPrecision(2)).toString()
-    : displayRounding(chaos, false, true);
+  return chaos < 0.01 ? "0.00" : chaos.toFixed(2);
 }
