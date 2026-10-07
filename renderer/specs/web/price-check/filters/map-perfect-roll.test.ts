@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { init } from "@/assets/data";
 import { ModifierType } from "@/parser/modifiers";
-import { ItemCategory, ItemRarity } from "@/parser";
+import { ItemCategory, ItemRarity, parseClipboard } from "@/parser";
 import {
   createExactStatFilters,
   calculatedStatToFilter,
@@ -20,6 +20,43 @@ beforeAll(async () => {
 });
 
 describe("Waystone and Tablet minimums", () => {
+  it.each([
+    [25, 25],
+    [24, 23],
+  ])(
+    "puts Verisium roll %s in MIN with 1 percent tablet tolerance",
+    (value, expected) => {
+      const item = parseClipboard(`Item Class: Tablet
+Rarity: Rare
+Void Instigation
+Expedition Tablet
+--------
+Item Level: 80
+--------
+{ Implicit Modifier }
+Adds a Kalguuran Expedition to a Map
+10 uses remaining
+--------
+{ Suffix Modifier "of Verisium" (Tier: 1) }
+Monsters from Verisium Remnants drop ${value}(15-25)% increased Verisium
+--------
+Can be used in a personal Map Device to add modifiers to a Map.`)._unsafeUnwrap();
+      expect(item.unknownModifiers).toEqual([]);
+      const { presets } = createPresets(item, {
+        ...createTestCreateOptions(),
+        tabletStatRange: 1,
+        defaultAllSelected: true,
+      });
+      const stat = presets[0].stats.find(
+        (f) =>
+          f.statRef ===
+          "Monsters from Verisium Remnants drop #% increased Verisium",
+      )!;
+      expect(stat.roll?.min).toBe(expected);
+      expect(stat.roll?.max).toBeUndefined();
+      expect(stat.roll?.tradeInvert).toBeFalsy();
+    },
+  );
   it.each([ItemCategory.Map, ItemCategory.Tablet])(
     "uses independent tolerances for %s in every preset",
     (category) => {
