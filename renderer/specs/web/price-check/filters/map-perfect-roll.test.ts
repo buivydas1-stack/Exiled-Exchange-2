@@ -1,8 +1,17 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { init } from "@/assets/data";
+import { ModifierType } from "@/parser/modifiers";
 import { ItemCategory, ItemRarity } from "@/parser";
-import { calculatedStatToFilter } from "@/web/price-check/filters/create-stat-filters";
-import { createTestItem, makeCalcStat } from "@specs/helper";
+import {
+  createExactStatFilters,
+  calculatedStatToFilter,
+} from "@/web/price-check/filters/create-stat-filters";
+import {
+  createTestItem,
+  makeCalcStat,
+  createTestCreateOptions,
+} from "@specs/helper";
+import { createPresets } from "@/web/price-check/filters/create-presets";
 import { setupTests } from "@specs/vitest.setup";
 
 beforeAll(async () => {
@@ -11,6 +20,47 @@ beforeAll(async () => {
 });
 
 describe("Waystone and Tablet minimums", () => {
+  it.each([ItemCategory.Map, ItemCategory.Tablet])(
+    "uses independent tolerances for %s in every preset",
+    (category) => {
+      const item = {
+        ...createTestItem(),
+        category,
+        rarity: ItemRarity.Rare,
+        mapTier: 99,
+      };
+      const calc = makeCalcStat(
+        "#% increased Pack Size in Map",
+        100,
+        ModifierType.Implicit,
+      );
+      item.statsByType = [calc];
+      const opts = {
+        ...createTestCreateOptions(),
+        mapStatRange: 20,
+        tabletStatRange: 40,
+      };
+      const expected = category === ItemCategory.Map ? 80 : 60;
+      expect(
+        createExactStatFilters(item, [calc], opts).find(
+          (f) => f.statRef === calc.stat.ref,
+        )?.roll?.min,
+      ).toBe(expected);
+      const { presets } = createPresets(item, opts);
+      for (const preset of presets) {
+        expect(
+          preset.stats.find((f) => f.statRef === calc.stat.ref)?.roll?.min,
+        ).toBe(expected);
+      }
+      opts.tabletStatRange = 0;
+      const exact = category === ItemCategory.Map ? 80 : 100;
+      expect(
+        createExactStatFilters(item, [calc], opts).find(
+          (f) => f.statRef === calc.stat.ref,
+        )?.roll?.min,
+      ).toBe(exact);
+    },
+  );
   it.each([
     [5, 9],
     [6, 14],

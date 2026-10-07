@@ -504,6 +504,7 @@ function upgradeConfig(_config: Config): Config {
   }
   priceCheck.modifierExclusions ??= "";
   priceCheck.mapStatRange ??= 0;
+  priceCheck.tabletStatRange ??= priceCheck.mapStatRange;
 
   for (const widget of config.widgets) {
     if (widget.wmType === "stash-search") {

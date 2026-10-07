@@ -179,6 +179,7 @@ export default defineComponent({
           activateStockFilter: true,
           searchStatRange: 10,
           mapStatRange: 0,
+          tabletStatRange: 0,
           useEn: true,
           currency: undefined,
           listingType: undefined,

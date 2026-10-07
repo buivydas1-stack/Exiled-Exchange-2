@@ -209,6 +209,7 @@ export default defineComponent({
         showSeller: false,
         searchStatRange: 10,
         mapStatRange: 0,
+        tabletStatRange: 0,
         showCursor: true,
         requestPricePrediction: false,
         rememberCurrency: false,

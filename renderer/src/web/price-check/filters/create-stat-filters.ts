@@ -42,13 +42,16 @@ export function createExactStatFilters(
   opts: {
     searchStatRange: number;
     mapStatRange?: number;
+    tabletStatRange?: number;
     defaultAllSelected: boolean;
   },
 ): StatFilter[] {
   performance.mark("create-exact-filters-start");
   let searchInRange = Math.min(2, opts.searchStatRange);
-  if (item.category === ItemCategory.Tablet) {
+  if (item.category === ItemCategory.Map) {
     searchInRange = opts.mapStatRange ?? 0;
+  } else if (item.category === ItemCategory.Tablet) {
+    searchInRange = opts.tabletStatRange ?? opts.mapStatRange ?? 0;
   }
 
   if (item.mapBlighted || item.category === ItemCategory.Invitation) return [];

@@ -27,6 +27,7 @@ export function createPresets(
     activateStockFilter: boolean;
     searchStatRange: number;
     mapStatRange?: number;
+    tabletStatRange?: number;
     useEn: boolean;
     defaultAllSelected: boolean;
   },
@@ -35,7 +36,13 @@ export function createPresets(
     item.category === ItemCategory.Map ||
     item.category === ItemCategory.Tablet
   ) {
-    opts = { ...opts, searchStatRange: opts.mapStatRange ?? 0 };
+    opts = {
+      ...opts,
+      searchStatRange:
+        item.category === ItemCategory.Tablet
+          ? (opts.tabletStatRange ?? opts.mapStatRange ?? 0)
+          : (opts.mapStatRange ?? 0),
+    };
   }
   // logbooks aren't real anymore
   if (item.info.refName === "logbook here") {

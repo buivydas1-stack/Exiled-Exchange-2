@@ -42,6 +42,7 @@ export interface PriceCheckWidget extends Widget {
   showSeller: false | "account" | "ign";
   searchStatRange: number;
   mapStatRange: number;
+  tabletStatRange: number;
   showRateLimitState: boolean;
   apiLatencySeconds: number;
   collapseListings: "api" | "app";

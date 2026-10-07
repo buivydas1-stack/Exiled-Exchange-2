@@ -98,6 +98,22 @@
         }}</ui-radio>
       </div>
     </div>
+    <div class="mb-2">
+      <div class="flex-1 mb-1">{{ t(":fill_rolls_tablets") }}</div>
+      <div class="mb-4 flex">
+        <div class="flex mr-6">
+          <span class="mr-1">+-</span>
+          <input
+            v-model.number="tabletStatRange"
+            class="rounded bg-gray-900 px-1 block w-16 mb-1 font-poe text-center"
+          />
+          <span class="ml-1">%</span>
+        </div>
+        <ui-radio v-model="tabletStatRange" :value="0">{{
+          t(":fill_roll_exact")
+        }}</ui-radio>
+      </div>
+    </div>
     <div class="mb-4">
       <div class="flex-1 mb-1">{{ t(":core_currency") }}</div>
       <div class="mb-1 flex">
@@ -403,6 +419,17 @@ export default defineComponent({
           if (typeof value !== "number") return;
           if (value >= 0 && value <= 50) {
             configWidget.value.mapStatRange = value;
+          }
+        },
+      }),
+      tabletStatRange: computed<number>({
+        get() {
+          return configWidget.value.tabletStatRange;
+        },
+        set(value) {
+          if (typeof value !== "number") return;
+          if (value >= 0 && value <= 50) {
+            configWidget.value.tabletStatRange = value;
           }
         },
       }),

@@ -161,6 +161,7 @@ export default defineComponent({
           activateStockFilter: widget.value.activateStockFilter,
           searchStatRange: widget.value.searchStatRange,
           mapStatRange: widget.value.mapStatRange,
+          tabletStatRange: widget.value.tabletStatRange,
           useEn:
             (AppConfig().language === "cmn-Hant" &&
               AppConfig().realm === "pc-ggg") ||
